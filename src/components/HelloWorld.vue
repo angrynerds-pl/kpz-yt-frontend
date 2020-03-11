@@ -162,6 +162,11 @@ import {
 @Component
 export default class HelloWorld extends Vue {
   @Prop() private msg!: string;
+
+  created() {
+    // Test
+    console.log(this.msg);
+  },
 }
 </script>
 
