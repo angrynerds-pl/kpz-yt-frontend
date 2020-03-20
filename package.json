@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.149",
+    "@types/vuelidate": "^0.7.11",
     "arrive": "^2.4.1",
+    "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "element-ready": "^4.1.1",
     "lodash": "^4.17.15",
@@ -22,8 +24,10 @@
     "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.1.5",
+    "vuelidate": "^0.7.5",
     "vuetify": "^2.2.11",
-    "vuex": "^3.1.2"
+    "vuex": "^3.1.2",
+    "watchpack": "^1.6.0"
   },
   "devDependencies": {
     "@types/chrome": "0.0.99",

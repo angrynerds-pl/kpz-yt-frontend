@@ -102,6 +102,13 @@ import {
 export default class HelloWorld extends Vue {
   public name = 'HelloWorld';
 
+  // mounted() {
+  //   console.log(
+  //     'base url',
+  //     process.env.VUE_APP_ROOT_API
+  //   );
+  // }
+
   public ecosystem = [
     {
       text: 'vuetify-loader',
