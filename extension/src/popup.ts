@@ -4,7 +4,13 @@ import Vuetify from 'vuetify/lib';
 import Vuelidate from 'vuelidate';
 import axios from 'axios';
 
-axios.defaults.baseURL = `${process.env.API_URL}`;
+axios.defaults.baseURL = `${process.env.VUE_APP_ROOT_API}`;
+const bkg = chrome.extension.getBackgroundPage();
+
+if (bkg) {
+  bkg.console.log('url', process.env.VUE_APP_ROOT_API);
+}
+
 
 Vue.use(Vuetify);
 Vue.use(Vuelidate);

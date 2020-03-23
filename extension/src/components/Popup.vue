@@ -42,14 +42,14 @@
 </template>
 
 <script lang="ts">
-/// <reference path="../../../node_modules/@types/chrome/index.d.ts" />
-import Vue from 'vue';
-import axios from 'axios';
-import { validationMixin } from 'vuelidate';
-import { required } from 'vuelidate/lib/validators';
-import Component from 'vue-class-component';
+  /// <reference path="../../../node_modules/@types/chrome/index.d.ts" />
+  import Vue from 'vue';
+  import axios from 'axios';
+  import { validationMixin } from 'vuelidate';
+  import { required } from 'vuelidate/lib/validators';
+  import Component from 'vue-class-component';
 
-@Component({
+  @Component({
   mixins: [validationMixin],
   validations: {
     authData: {
@@ -63,16 +63,11 @@ import Component from 'vue-class-component';
   }
 })
 export default class Popup extends Vue {
-  apiUrl!: string;
   authData: any = {
     username: null,
     password: null
   };
   loading = false;
-
-  created() {
-    this.apiUrl = process.env.API_URL;
-  }
 
   submit() {
     const bkg = chrome.extension.getBackgroundPage();

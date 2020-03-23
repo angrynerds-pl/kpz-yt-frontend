@@ -13,11 +13,13 @@
     "ext:clean": "rimraf extension/dist"
   },
   "dependencies": {
+    "@types/dotenv-webpack": "^1.7.0",
     "@types/lodash": "^4.14.149",
     "@types/vuelidate": "^0.7.11",
     "arrive": "^2.4.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
+    "dotenv-webpack": "^1.7.0",
     "element-ready": "^4.1.1",
     "lodash": "^4.17.15",
     "vue": "^2.6.11",
