@@ -3,8 +3,9 @@ import CopyPlugin from 'copy-webpack-plugin';
 import { Configuration } from 'webpack';
 import { VueLoaderPlugin } from 'vue-loader';
 import VuetifyLoaderPlugin from 'vuetify-loader/lib/plugin';
-const srcDir = '../src/';
+import Dotenv from 'dotenv-webpack';
 
+const srcDir = '../src/';
 const config: Configuration = {
   entry: {
     popup: path.join(
@@ -80,6 +81,10 @@ const config: Configuration = {
     extensions: ['*', '.js', '.vue', '.json']
   },
   plugins: [
+    new Dotenv({
+      path: './.env',
+      safe: true
+    }),
     new CopyPlugin([{ from: '.', to: '../' }], {
       context: path.join(__dirname, '../public')
     }),
