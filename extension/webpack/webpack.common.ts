@@ -81,15 +81,15 @@ const config: Configuration = {
     extensions: ['*', '.js', '.vue', '.json']
   },
   plugins: [
+    new Dotenv({
+      path: './.env',
+      safe: true
+    }),
     new CopyPlugin([{ from: '.', to: '../' }], {
       context: path.join(__dirname, '../public')
     }),
     new VueLoaderPlugin(),
-    new VuetifyLoaderPlugin(),
-    new Dotenv({
-      path: './.env',
-      safe: true
-    })
+    new VuetifyLoaderPlugin()
   ]
 };
 
