@@ -4,6 +4,7 @@ module.exports = {
     node: true,
     browser: true,
     webextensions: true
+
   },
   extends: [
     'eslint:recommended',

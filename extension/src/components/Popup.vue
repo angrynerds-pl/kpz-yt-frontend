@@ -1,60 +1,57 @@
 <template>
   <v-app>
+    <v-toolbar flat short>
+      <v-btn icon @click.prevent="close">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </v-toolbar>
     <v-content class="pa-2">
       <v-container fluid class="login-container">
-        <v-btn
-          class="close-button-container"
-          icon
-          @click.prevent="close"
-        >
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+        <h1 class="text-center">
+          {{
+            isLoggedIn
+              ? 'What do you think about?'
+              : 'Login'
+          }}
+        </h1>
         <div
           v-if="isLoggedIn"
-          class="d-flex flex-column fill-height justify-space-around align-center"
+          class="d-flex flex-column justify-space-around align-center mt-6"
         >
-          <div
-            class="d-flex justify-center align-center"
-          >
-            <h2>
-              What you think about?
-            </h2>
+          <div class="mb-6">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  dark
+                  v-on="on"
+                  color="success"
+                  icon
+                  @click.prevent="logout"
+                >
+                  <v-icon>mdi-open-in-new</v-icon>
+                </v-btn>
+              </template>
+              <span>Go to app</span>
+            </v-tooltip>
           </div>
-          <!--          <div-->
-          <!--            class="d-flex flex-row flex-grow-1 justify-space-around align-center"-->
-          <!--          >-->
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                dark
-                v-on="on"
-                color="success"
-                icon
-                @click.prevent="logout"
-              >
-                <v-icon>mdi-open-in-new</v-icon>
-              </v-btn>
-            </template>
-            <span>Go to app</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                dark
-                v-on="on"
-                color="success"
-                icon
-                @click.prevent="logout"
-              >
-                <v-icon>mdi-exit-to-app</v-icon>
-              </v-btn>
-            </template>
-            <span>Logout</span>
-          </v-tooltip>
+          <div class="mt-6">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  dark
+                  v-on="on"
+                  color="success"
+                  icon
+                  @click.prevent="logout"
+                >
+                  <v-icon>mdi-exit-to-app</v-icon>
+                </v-btn>
+              </template>
+              <span>Logout</span>
+            </v-tooltip>
+          </div>
         </div>
-        <!--        </div>-->
         <v-form v-else class="pt-4 pb-4">
-          <h1 class="headline mb-2">Login</h1>
           <v-text-field
             class="mb-2"
             v-model="authData.username"
@@ -95,7 +92,12 @@
               Have not account yet?
             </span>
           </div>
-          <v-btn text block>
+          <v-btn
+            text
+            block
+            small
+            @click.prevent="openNewCard"
+          >
             Sign up
           </v-btn>
         </v-form>
@@ -126,7 +128,7 @@ import Component from 'vue-class-component';
   }
 })
 export default class Popup extends Vue {
-  authData: any = {
+  authData = {
     username: null,
     password: null
   };
@@ -136,7 +138,7 @@ export default class Popup extends Vue {
   created() {
     this.checkIsUserLoggedIn();
     chrome.storage.onChanged.addListener(
-      (changes, namespace) => {
+      changes => {
         if (changes) {
           this.checkIsUserLoggedIn();
         }
@@ -152,15 +154,16 @@ export default class Popup extends Vue {
     this.loading = true;
     axios
       .post('sessions', this.authData)
-      .then((res: any) => {
+      .then(res => {
         console.log('res', res.data.access_token);
         chrome.storage.sync.set({
+          // eslint-disable-next-line @typescript-eslint/camelcase
           access_token: res.data.access_token
         });
         this.loading = false;
       })
       .catch(error => {
-        console.log('error');
+        console.log('error', error);
         this.loading = false;
       });
   }
@@ -210,17 +213,18 @@ export default class Popup extends Vue {
       }
     );
   }
+
+  private openNewCard() {
+    window.open(process.env.VUE_APP_ROOT_FRONT);
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .login-container {
   min-width: 250px;
-  height: 100%;
 }
-.headline {
-  text-align: center;
-}
+
 .close-button-container {
   position: absolute;
   top: 0;
