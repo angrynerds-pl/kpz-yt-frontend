@@ -1,9 +1,17 @@
 <template>
   <v-app>
-    <v-toolbar flat short>
-      <v-btn icon @click.prevent="close">
+    <v-toolbar flat short dense>
+      <v-btn
+        class="ml-n1"
+        small
+        icon
+        @click.prevent="close"
+      >
         <v-icon>mdi-close</v-icon>
       </v-btn>
+      <v-toolbar-title>
+        YouTube Favourite Lists
+      </v-toolbar-title>
     </v-toolbar>
     <v-content class="pa-2">
       <v-container fluid class="login-container">
@@ -14,44 +22,40 @@
               : 'Login'
           }}
         </h1>
-        <div
-          v-if="isLoggedIn"
-          class="d-flex flex-column justify-space-around align-center mt-6"
-        >
-          <div class="mb-6">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  dark
-                  v-on="on"
-                  color="success"
-                  icon
-                  @click.prevent="logout"
-                >
-                  <v-icon>mdi-open-in-new</v-icon>
-                </v-btn>
-              </template>
-              <span>Go to app</span>
-            </v-tooltip>
-          </div>
-          <div class="mt-6">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  dark
-                  v-on="on"
-                  color="success"
-                  icon
-                  @click.prevent="logout"
-                >
-                  <v-icon>mdi-exit-to-app</v-icon>
-                </v-btn>
-              </template>
-              <span>Logout</span>
-            </v-tooltip>
-          </div>
-        </div>
-        <v-form v-else class="pt-4 pb-4">
+        <v-row v-if="isLoggedIn" justify="center">
+          <v-col
+            class="d-flex justify-space-around"
+          >
+            <v-btn
+              dark
+              color="success"
+              @click.prevent="openFront"
+            >
+              <v-icon class="mr-1"
+                >mdi-open-in-new</v-icon
+              >
+              Go to app
+            </v-btn>
+            <v-btn
+              color="success"
+              @click.prevent="logout"
+            >
+              <v-icon class="mr-1"
+                >mdi-exit-to-app</v-icon
+              >
+              Logout
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-form v-else class="py-4">
+          <v-alert
+            v-model="alertVisible"
+            dismissible
+            type="error"
+            dense
+          >
+            {{ alertMessage }}
+          </v-alert>
           <v-text-field
             class="mb-2"
             v-model="authData.username"
@@ -88,15 +92,13 @@
             Login
           </v-btn>
           <div class="mb-2 d-flex justify-center">
-            <span>
-              Have not account yet?
-            </span>
+            <span>Have not account yet?</span>
           </div>
           <v-btn
             text
             block
             small
-            @click.prevent="openNewCard"
+            @click.prevent="openFront('register')"
           >
             Sign up
           </v-btn>
@@ -108,15 +110,31 @@
 
 <script lang="ts">
 /// <reference path="../../../node_modules/@types/chrome/index.d.ts" />
+
 import Vue from 'vue';
 import axios from 'axios';
 import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
 import Component from 'vue-class-component';
+import { Validations } from 'vuelidate-property-decorators';
+import { ValidationEvaluation } from 'vue/types/vue';
+
+interface AuthData {
+  username: string;
+  password: string;
+}
 
 @Component({
-  mixins: [validationMixin],
-  validations: {
+  mixins: [validationMixin]
+})
+export default class Popup extends Vue {
+  authData: AuthData = {
+    username: '',
+    password: ''
+  };
+
+  @Validations()
+  validations = {
     authData: {
       username: {
         required
@@ -125,15 +143,12 @@ import Component from 'vue-class-component';
         required
       }
     }
-  }
-})
-export default class Popup extends Vue {
-  authData = {
-    username: null,
-    password: null
   };
+
   loading = false;
   isLoggedIn = false;
+  alertVisible = false;
+  alertMessage = '';
 
   created() {
     this.checkIsUserLoggedIn();
@@ -161,9 +176,17 @@ export default class Popup extends Vue {
           access_token: res.data.access_token
         });
         this.loading = false;
+        this.alertVisible = false;
       })
       .catch(error => {
+        if (error.response.status == 404) {
+          this.alertVisible = true;
+          this.alertMessage =
+            'Invalid username or password.';
+        }
         console.log('error', error);
+      })
+      .finally(() => {
         this.loading = false;
       });
   }
@@ -177,28 +200,32 @@ export default class Popup extends Vue {
   }
 
   get usernameErrors() {
-    const errors: string[] = [];
-    if (this.$v.authData) {
-      if (!this.$v.authData.username.$dirty) {
-        return errors;
-      }
-      if (!this.$v.authData.username.required) {
-        errors.push('Field is required!');
-      }
-    }
-    return errors;
+    const vAuthData = this.$v.authData;
+    if (vAuthData)
+      return this.getErrors(
+        vAuthData.password as ValidationEvaluation
+      );
+    else return [];
   }
 
   get passwordErrors() {
+    const vAuthData = this.$v.authData;
+    if (vAuthData)
+      return this.getErrors(
+        vAuthData.password as ValidationEvaluation
+      );
+    else return [];
+  }
+
+  getErrors(fieldEval: ValidationEvaluation) {
     const errors: string[] = [];
-    if (this.$v.authData) {
-      if (!this.$v.authData.password.$dirty) {
-        return errors;
-      }
-      if (!this.$v.authData.password.required) {
-        errors.push('Field is required!');
-      }
+    if (!fieldEval.$dirty) {
+      return errors;
     }
+    if (!fieldEval.required) {
+      errors.push('Field is required!');
+    }
+
     return errors;
   }
 
@@ -207,27 +234,21 @@ export default class Popup extends Vue {
       ['access_token'],
       result => {
         const token = result.access_token;
-        token
-          ? (this.isLoggedIn = true)
-          : (this.isLoggedIn = false);
+        this.isLoggedIn = !!token;
       }
     );
   }
 
-  private openNewCard() {
-    window.open(process.env.VUE_APP_ROOT_FRONT);
+  private openFront(url: string = '') {
+    const finalUrl =
+      process.env.VUE_APP_ROOT_FRONT + '/' + url;
+    window.open(finalUrl);
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .login-container {
-  min-width: 250px;
-}
-
-.close-button-container {
-  position: absolute;
-  top: 0;
-  left: 0;
+  min-width: 350px;
 }
 </style>
