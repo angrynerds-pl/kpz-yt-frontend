@@ -113,7 +113,6 @@
 
 import Vue from 'vue';
 import axios from 'axios';
-import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
 import Component from 'vue-class-component';
 import { Validations } from 'vuelidate-property-decorators';
@@ -124,9 +123,7 @@ interface AuthData {
   password: string;
 }
 
-@Component({
-  mixins: [validationMixin]
-})
+@Component({})
 export default class Popup extends Vue {
   authData: AuthData = {
     username: '',
