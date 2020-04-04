@@ -1,9 +1,63 @@
 <template>
   <v-app>
-    <v-content>
+    <v-toolbar flat short dense>
+      <v-btn
+        class="ml-n1"
+        small
+        icon
+        @click.prevent="close"
+      >
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      <v-toolbar-title>
+        YouTube Favourite Lists
+      </v-toolbar-title>
+    </v-toolbar>
+    <v-content class="pa-2">
       <v-container fluid class="login-container">
-        <v-form>
+        <h1 class="text-center">
+          {{
+            isLoggedIn
+              ? 'What do you think about?'
+              : 'Login'
+          }}
+        </h1>
+        <v-row v-if="isLoggedIn" justify="center">
+          <v-col
+            class="d-flex justify-space-around"
+          >
+            <v-btn
+              dark
+              color="success"
+              @click.prevent="openFront"
+            >
+              <v-icon class="mr-1"
+                >mdi-open-in-new</v-icon
+              >
+              Go to app
+            </v-btn>
+            <v-btn
+              color="success"
+              @click.prevent="logout"
+            >
+              <v-icon class="mr-1"
+                >mdi-exit-to-app</v-icon
+              >
+              Logout
+            </v-btn>
+          </v-col>
+        </v-row>
+        <v-form v-else class="py-4">
+          <v-alert
+            v-model="alertVisible"
+            dismissible
+            type="error"
+            dense
+          >
+            {{ alertMessage }}
+          </v-alert>
           <v-text-field
+            class="mb-2"
             v-model="authData.username"
             :error-messages="usernameErrors"
             autocomplete="off"
@@ -14,6 +68,7 @@
           ></v-text-field>
 
           <v-text-field
+            class="mb-2"
             v-model="authData.password"
             label="Password"
             :error-messages="passwordErrors"
@@ -26,6 +81,7 @@
           ></v-text-field>
 
           <v-btn
+            class="mb-6"
             type="submit"
             color="success"
             :loading="loading"
@@ -35,6 +91,17 @@
           >
             Login
           </v-btn>
+          <div class="mb-2 d-flex justify-center">
+            <span>Have not account yet?</span>
+          </div>
+          <v-btn
+            text
+            block
+            small
+            @click.prevent="openFront('register')"
+          >
+            Sign up
+          </v-btn>
         </v-form>
       </v-container>
     </v-content>
@@ -43,15 +110,28 @@
 
 <script lang="ts">
 /// <reference path="../../../node_modules/@types/chrome/index.d.ts" />
+
 import Vue from 'vue';
 import axios from 'axios';
-import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
 import Component from 'vue-class-component';
+import { Validations } from 'vuelidate-property-decorators';
+import { ValidationEvaluation } from 'vue/types/vue';
 
-@Component({
-  mixins: [validationMixin],
-  validations: {
+interface AuthData {
+  username: string;
+  password: string;
+}
+
+@Component({})
+export default class Popup extends Vue {
+  authData: AuthData = {
+    username: '',
+    password: ''
+  };
+
+  @Validations()
+  validations = {
     authData: {
       username: {
         required
@@ -60,36 +140,50 @@ import Component from 'vue-class-component';
         required
       }
     }
-  }
-})
-export default class Popup extends Vue {
-  authData: any = {
-    username: null,
-    password: null
   };
+
   loading = false;
+  isLoggedIn = false;
+  alertVisible = false;
+  alertMessage = '';
+
+  created() {
+    this.checkIsUserLoggedIn();
+    chrome.storage.onChanged.addListener(
+      changes => {
+        if (changes) {
+          this.checkIsUserLoggedIn();
+        }
+      }
+    );
+  }
 
   submit() {
-    const bkg = chrome.extension.getBackgroundPage();
-
     this.$v.$touch();
     if (this.$v.$error) {
       return;
     }
     this.loading = true;
     axios
-      .post('sessions', {
-        username: this.authData.username,
-        password: this.authData.password
-      })
-      .then((res: any) => {
+      .post('sessions', this.authData)
+      .then(res => {
+        console.log('res', res.data.access_token);
         chrome.storage.sync.set({
-          access_token: res.access_token
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          access_token: res.data.access_token
         });
         this.loading = false;
+        this.alertVisible = false;
       })
       .catch(error => {
-        bkg && bkg.console.log('error');
+        if (error.response.status == 404) {
+          this.alertVisible = true;
+          this.alertMessage =
+            'Invalid username or password.';
+        }
+        console.log('error', error);
+      })
+      .finally(() => {
         this.loading = false;
       });
   }
@@ -98,36 +192,60 @@ export default class Popup extends Vue {
     window.close();
   }
 
+  logout() {
+    chrome.storage.sync.clear();
+  }
+
   get usernameErrors() {
-    const errors: string[] = [];
-    if (this.$v.authData) {
-      if (!this.$v.authData.username.$dirty) {
-        return errors;
-      }
-      if (!this.$v.authData.username.required) {
-        errors.push('Field is required!');
-      }
-    }
-    return errors;
+    const vAuthData = this.$v.authData;
+    if (vAuthData)
+      return this.getErrors(
+        vAuthData.password as ValidationEvaluation
+      );
+    else return [];
   }
 
   get passwordErrors() {
+    const vAuthData = this.$v.authData;
+    if (vAuthData)
+      return this.getErrors(
+        vAuthData.password as ValidationEvaluation
+      );
+    else return [];
+  }
+
+  getErrors(fieldEval: ValidationEvaluation) {
     const errors: string[] = [];
-    if (this.$v.authData) {
-      if (!this.$v.authData.password.$dirty) {
-        return errors;
-      }
-      if (!this.$v.authData.password.required) {
-        errors.push('Field is required!');
-      }
+    if (!fieldEval.$dirty) {
+      return errors;
     }
+    if (!fieldEval.required) {
+      errors.push('Field is required!');
+    }
+
     return errors;
+  }
+
+  private checkIsUserLoggedIn() {
+    chrome.storage.sync.get(
+      ['access_token'],
+      result => {
+        const token = result.access_token;
+        this.isLoggedIn = !!token;
+      }
+    );
+  }
+
+  private openFront(url: string = '') {
+    const finalUrl =
+      process.env.VUE_APP_ROOT_FRONT + '/' + url;
+    window.open(finalUrl);
   }
 }
 </script>
 
 <style lang="scss" scoped>
 .login-container {
-  min-width: 250px;
+  min-width: 350px;
 }
 </style>
