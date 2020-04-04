@@ -7,16 +7,19 @@
             <h1 class="display-2 text-md-left text-center">
               YouTube Favourite Lists
             </h1>
+            <h5 class="subtitle-1	text-md-left text-center">
+              The best way to lorem ipsum!
+            </h5>
           </v-col>
         </v-row>
-        <v-row class="main-row" align="center">
+        <v-row class="tall-row" align="center">
           <v-col :order-md="1" :order="2" :cols="12" :md="4" :sm="12">
             <router-view @showSnackbar="showSnackbar" />
           </v-col>
           <v-col
             :order-md="2"
             :order="1"
-            class="d-flex align-center flex-column text-center 	"
+            class="d-flex align-center flex-column text-center"
           >
             <v-img max-width="30%" src="@/assets/album.png" />
             <h1 title="Really!" class="font-weight-light">
@@ -27,6 +30,42 @@
             <h5 class="font-weight-light">
               * Without need for signing in to Google account.
             </h5>
+          </v-col>
+        </v-row>
+        <v-divider />
+        <v-row class="tall-row">
+          <v-col
+            :cols="12"
+            :md="5"
+            class="pb-0 pb-md-3 d-flex flex-column align-center justify-center"
+          >
+            <h1 class="d-inline-block d-md-none">
+              Check out our Chrome Extension
+            </h1>
+            <v-img
+              :max-width="this.$vuetify.breakpoint.smAndDown ? 200 : 300"
+              contain
+              src="@/assets/work.png"
+            />
+          </v-col>
+          <v-col
+            class="pt-0 pt-md-3 d-flex flex-column align-start justify-center"
+          >
+            <h1 class="d-none d-md-inline-block">
+              Check out our Chrome Extension
+            </h1>
+            <ol class="title">
+              <li>Install extension from store</li>
+              <li>Sign in using popup</li>
+              <li>Use button integrated with YouTube page</li>
+            </ol>
+            <v-btn
+              color="error"
+              class="mt-3"
+              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            >
+              Install Extension now
+            </v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -64,7 +103,7 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.main-row {
+.tall-row {
   min-height: 500px;
 }
 </style>
