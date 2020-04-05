@@ -8,7 +8,13 @@
     </v-card-subtitle>
 
     <v-card-text>
-      <v-alert v-if="alertInfo" color="error" dark dismissible dense>
+      <v-alert
+        v-if="alertInfo"
+        color="error"
+        dark
+        dismissible
+        dense
+      >
         {{ alertInfo }}
       </v-alert>
       <v-form>
@@ -34,7 +40,7 @@
           @click="$router.push('/signup')"
           small
           text
-          :loading="loading"
+          tabindex="-1"
         >
           Sign up
         </v-btn>
@@ -58,9 +64,14 @@ import { Component } from 'vue-property-decorator';
 import { Validate } from 'vuelidate-property-decorators';
 import { required } from 'vuelidate/lib/validators';
 import { ValidationEvaluation } from 'vue/types/vue';
-import axios from 'axios';
+import { Action } from 'vuex-class';
+import { AxiosPromise } from 'axios';
 @Component({})
 export default class SignInForm extends Vue {
+  @Action('login', { namespace: 'user' }) loginAction!: (payload: {
+    username: string;
+    password: string;
+  }) => AxiosPromise;
   @Validate({ required })
   username = '';
   @Validate({ required })
@@ -76,15 +87,11 @@ export default class SignInForm extends Vue {
       return;
     }
     this.loading = true;
-    axios
-      .post('sessions', {
-        username: this.username,
-        password: this.password
-      })
-      .then(res => {
-        //TODO: Mutation -> set user in vuex
-        // eslint-disable-next-line
-        const access_token = res.data.access_token;
+    this.loginAction({
+      username: this.username,
+      password: this.password
+    })
+      .then(() => {
         this.$router.push('/dashboard');
       })
       .catch(error => {

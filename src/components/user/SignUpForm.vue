@@ -8,7 +8,13 @@
     </v-card-subtitle>
 
     <v-card-text>
-      <v-alert v-if="alertInfo" color="error" dark dismissible dense>
+      <v-alert
+        v-if="alertInfo"
+        color="error"
+        dark
+        dismissible
+        dense
+      >
         {{ alertInfo }}
       </v-alert>
       <v-form>
