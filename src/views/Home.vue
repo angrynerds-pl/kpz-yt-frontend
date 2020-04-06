@@ -42,12 +42,12 @@
               <span
                 class="font-weight-medium"
                 style="color:red"
-                >YoutTube</span
+                >YouTube</span
               >
               videos everywhere!*
             </h1>
             <h5 class="font-weight-light">
-              * Without need for signing in to Google account.
+              * Without need for signing in to a Google account.
             </h5>
           </v-col>
         </v-row>
