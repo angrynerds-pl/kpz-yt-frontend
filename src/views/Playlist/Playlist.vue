@@ -6,12 +6,14 @@
       dark
     >
       <v-app-bar-nav-icon @click="$emit('toggle-nav')"></v-app-bar-nav-icon>
-      <v-toolbar-title>Dashboard</v-toolbar-title>
+      <v-toolbar-title>Playlist name here</v-toolbar-title>
     </v-app-bar>
 
     <v-content>
-      <v-container fluid>
-        Some charts and kind words here
+      <v-container>
+        <!-- TODO -->
+        List of items and actions
+        {{ $route.params.id }}
       </v-container>
     </v-content>
   </div>
@@ -21,7 +23,7 @@
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 @Component({})
-export default class Dashboard extends Vue {}
+export default class Playlist extends Vue {}
 </script>
 
 <style

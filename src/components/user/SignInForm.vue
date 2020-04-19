@@ -92,7 +92,7 @@ export default class SignInForm extends Vue {
       password: this.password
     })
       .then(() => {
-        this.$router.push('/dashboard');
+        this.$router.push('/app');
       })
       .catch(error => {
         if (error.response.status === 404) {
