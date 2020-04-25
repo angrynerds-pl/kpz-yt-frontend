@@ -53,6 +53,13 @@
       </v-form>
     </v-card-text>
     <v-card-actions>
+      <v-btn
+        @click="$router.back()"
+        :loading="loading"
+        text
+      >
+        Sign up
+      </v-btn>
       <v-spacer />
       <v-btn
         color="error"

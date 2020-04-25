@@ -36,6 +36,21 @@
           </v-list-item-action>
         </v-list-item>
 
+        <v-list-item
+          link
+          @click="$router.push(`/app`)"
+        >
+          <v-list-item-avatar
+            color="grey lighten-5"
+            tile
+          >
+            <v-icon>mdi-chart-bar-stacked</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title>Dashboard</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-divider></v-divider>
         <nav-playlists />
       </v-list>
@@ -63,7 +78,7 @@ export default class App extends Vue {
   @Getter('user/user') user!: User;
   @Mutation('user/setUser') setUser!: () => void;
   @Mutation('user/logout') logoutMutation!: () => void;
-  nav = true;
+  nav = this.$vuetify.breakpoint.lgAndUp;
 
   /* TEST */
   @Mutation('player/setPlayData') setPlayData!: (payload: {

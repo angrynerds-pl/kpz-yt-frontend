@@ -4,7 +4,12 @@
     app
   >
     <v-row dense>
-      <v-col :cols="3">
+      <v-col
+        :cols="8"
+        :md="3"
+        :order="1"
+        :order-md="1"
+      >
         <v-row dense>
           <v-col
             cols="auto"
@@ -12,6 +17,8 @@
           >
             <v-sheet
               :width="playerWidth"
+              :min-height="playerHeight"
+              :min-width="playerWidth"
               :height="playerHeight"
               color="grey"
               class="d-flex align-center justify-center mr-4"
@@ -24,15 +31,21 @@
                 v-if="!isItemSet"
                 :size="playerWidth / 2"
                 dark
-                >mdi-music</v-icon
               >
+                mdi-music
+              </v-icon>
             </v-sheet>
 
             {{ item ? item.name : 'Pick a song' }}
           </v-col>
         </v-row>
       </v-col>
-      <v-col :cols="6">
+      <v-col
+        :cols="12"
+        :md="6"
+        :order="3"
+        :order-md="2"
+      >
         <v-row dense>
           <v-col>
             <v-row dense>
@@ -56,26 +69,30 @@
                   outlined
                   icon
                   class="mx-2"
-                  large
+                  :large="$vuetify.breakpoint.mdAndUp"
                   @click="playToggle"
                 >
                   <v-icon
                     v-if="playing"
-                    x-large
-                    >mdi-pause</v-icon
+                    :x-large="$vuetify.breakpoint.mdAndUp"
                   >
+                    mdi-pause
+                  </v-icon>
                   <v-icon
                     v-else
-                    x-large
-                    >mdi-play</v-icon
+                    :x-large="$vuetify.breakpoint.mdAndUp"
                   >
+                    mdi-play
+                  </v-icon>
                 </v-btn>
                 <v-btn
                   icon
                   class="mx-2"
                   @click="next"
                 >
-                  <v-icon>mdi-skip-forward</v-icon>
+                  <v-icon>
+                    mdi-skip-forward
+                  </v-icon>
                 </v-btn>
                 <v-btn
                   icon
@@ -102,10 +119,11 @@
                 class="py-1 d-flex align-center justify-end"
                 :cols="2"
               >
-                {{ currentDuration | durationFilter }}</v-col
-              >
+                {{ currentDuration | durationFilter }}
+              </v-col>
               <v-col class="d-flex align-center">
                 <v-slider
+                  dense
                   :max="duration"
                   :value="currentDuration"
                   @input="seek"
@@ -118,19 +136,25 @@
                 class="d-flex align-center justify-start"
                 :cols="2"
               >
-                {{ duration | durationFilter }}</v-col
-              >
+                {{ duration | durationFilter }}
+              </v-col>
             </v-row>
           </v-col>
         </v-row>
       </v-col>
       <v-col
-        :cols="3"
+        :cols="4"
+        :md="3"
+        :order="2"
+        :order-md="3"
         class="d-flex align-center justify-end"
       >
         <v-row dense>
           <v-spacer />
-          <v-col cols="6">
+          <v-col
+            :cols="12"
+            :lg="6"
+          >
             <v-slider
               :value="isMuted ? 0 : volume"
               :prepend-icon="volumeIcon"
@@ -186,8 +210,8 @@ export default class Player extends Vue {
   @Getter('player/isMuted') isMuted!: boolean;
   @Mutation('player/setVolume') setVolume!: (v: number) => void;
   @Mutation('player/setMuted') setMuted!: (v: boolean) => void;
-  @Mutation('player/next') next!: (v: boolean) => void;
-  @Mutation('player/prev') prev!: (v: boolean) => void;
+  @Mutation('player/next') next!: () => void;
+  @Mutation('player/prev') prev!: () => void;
 
   player: YouTubePlayer | null = null;
   playingInterval = 0;
@@ -201,7 +225,9 @@ export default class Player extends Vue {
     return this.playerHeight;
   }
   get playerHeight() {
-    return this.height * 0.8;
+    return this.$vuetify.breakpoint.smAndDown
+      ? this.height * 0.35
+      : this.height * 0.8;
   }
 
   get volumeIcon() {
@@ -229,6 +255,9 @@ export default class Player extends Vue {
     this.onMuteChange(this.isMuted);
     this.player.on('stateChange', v => {
       this.playing = v.data == PlayerStates.PLAYING;
+      if (v.data == PlayerStates.ENDED) {
+        this.next();
+      }
     });
   }
 

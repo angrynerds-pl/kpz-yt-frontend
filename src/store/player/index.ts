@@ -12,7 +12,7 @@ export enum RepeatMode {
 }
 
 export interface PlayerState {
-  playlist?: Playlist,
+  playlist?: Playlist;
   items: PlaylistItem[];
   currentIndex: number | null;
   volume: number;
