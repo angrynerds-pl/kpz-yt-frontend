@@ -29,7 +29,7 @@
             <v-btn
               dark
               color="success"
-              @click.prevent="openFront"
+              @click.prevent="openFront('')"
             >
               <v-icon class="mr-1"
                 >mdi-open-in-new</v-icon
@@ -98,7 +98,7 @@
             text
             block
             small
-            @click.prevent="openFront('register')"
+            @click.prevent="openFront('signup')"
           >
             Sign up
           </v-btn>

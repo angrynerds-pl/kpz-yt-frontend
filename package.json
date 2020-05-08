@@ -16,8 +16,10 @@
     "@types/dotenv-webpack": "^1.7.0",
     "@types/jwt-decode": "^2.2.1",
     "@types/lodash": "^4.14.149",
+    "@types/moment": "^2.13.0",
     "@types/url-parse": "^1.4.3",
     "@types/vuelidate": "^0.7.11",
+    "@types/youtube-player": "^5.5.2",
     "arrive": "^2.4.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
@@ -25,6 +27,7 @@
     "element-ready": "^4.1.1",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "url-parse": "^1.4.7",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.2",
@@ -33,7 +36,9 @@
     "vuelidate": "^0.7.5",
     "vuelidate-property-decorators": "^1.0.28",
     "vuetify": "^2.2.11",
-    "vuex": "^3.1.2"
+    "vuex": "^3.1.2",
+    "vuex-class": "^0.3.2",
+    "youtube-player": "^5.5.2"
   },
   "devDependencies": {
     "@types/chrome": "0.0.99",
