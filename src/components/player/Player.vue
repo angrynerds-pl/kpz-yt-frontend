@@ -35,8 +35,13 @@
                 mdi-music
               </v-icon>
             </v-sheet>
-
             {{ item ? item.name : 'Pick a song' }}
+             <v-icon
+             large
+              @click="redirect"
+              class="ml-4">
+              mdi-play-box
+            </v-icon>
           </v-col>
         </v-row>
       </v-col>
@@ -268,6 +273,13 @@ export default class Player extends Vue {
       } else {
         await this.play();
       }
+    }
+  }
+
+  async redirect() {
+    if (this.player && this.item) {
+      this.pause();
+      window.open('https://youtu.be/' + this.item.ytID + '?t=' + Math.floor(this.currentDuration), '_blank');
     }
   }
 

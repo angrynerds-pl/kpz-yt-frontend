@@ -28,10 +28,18 @@
       </v-list-item-action>
     </v-list-item>
 
+    <!-- Empty list item to make space for `New playlist` -->
+    <v-list-item
+      link
+      dense
+      disabled
+    >
+    </v-list-item>
     <v-list-item
       link
       dense
       @click="$router.push('/app/playlists')"
+      style="position:fixed;bottom:0;width:88%;background:#fff;"
     >
       <v-list-item-avatar>
         <v-icon>mdi-plus</v-icon>
