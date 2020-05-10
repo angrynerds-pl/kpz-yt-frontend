@@ -14,7 +14,7 @@ Vue.use(VueRouter);
 const routes: RouteConfig[] = [
   {
     path: '/',
-    name: 'YouTube Favourite Lists',
+    name: 'YouTube Favourite Lists', 
     component: Home,
     children: [
       {

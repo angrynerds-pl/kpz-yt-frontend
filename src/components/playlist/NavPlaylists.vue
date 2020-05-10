@@ -4,7 +4,7 @@
       link
       v-for="playlist in playlists"
       :key="playlist.id"
-      @click="$router.push(`/app/playlists/${playlist.id}`)"
+      @click="playlistSelected(`${playlist.id}`)"
     >
       <v-list-item-avatar
         color="grey lighten-5"
@@ -46,6 +46,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import bus from '../../main';
 import { Component } from 'vue-property-decorator';
 import { Getter } from 'vuex-class';
 import { Playlist } from '@/store/playlist';
@@ -57,9 +58,29 @@ export default class NavPlaylists extends Vue {
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
 
+  componentKey = 0;
   playlists: Playlist[] = [];
 
   beforeMount() {
+
+    bus.$on('refreshPlaylists', () => {
+      this.forceRerender(); 
+    })
+
+    this.updatePlaylists();
+  }
+
+  beforeUpdate() {
+    this.updatePlaylists();
+  }
+
+  playlistSelected(playlistId: number) {
+    this.$router.push(`/app/playlists/${playlistId}`);
+    //bus.$emit('refreshPlaylistList');
+  }
+
+
+  updatePlaylists(){
     axios
       .get(`users/${this.user.id}/playlists`, {
         headers: { Authorization: this.authHeader }
@@ -67,6 +88,10 @@ export default class NavPlaylists extends Vue {
       .then(res => {
         this.playlists = res.data.data;
       });
+  }
+
+  forceRerender() {
+    this.componentKey += 1;
   }
 }
 </script>

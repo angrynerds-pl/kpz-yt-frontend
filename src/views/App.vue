@@ -56,9 +56,27 @@
       </v-list>
     </v-navigation-drawer>
 
-    <router-view @toggle-nav="nav = !nav"></router-view>
+    <router-view  
+    @toggle-nav="nav = !nav" 
+    @showSnackbar="showSnackbar">
+    </router-view>
 
     <player />
+
+    <v-snackbar
+      v-model="snackbarVisible"
+      top
+    >
+      {{ snackbarInfo }}
+      <v-btn
+        dark
+        text
+        @click="snackbarVisible = false"
+        color="error"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -115,6 +133,14 @@ export default class App extends Vue {
   logout() {
     this.logoutMutation();
     this.$router.push('/');
+  }
+
+  snackbarInfo = '';
+  snackbarVisible = false;
+
+  showSnackbar(info: string) {
+    this.snackbarInfo = info;
+    this.snackbarVisible = true;
   }
 }
 </script>

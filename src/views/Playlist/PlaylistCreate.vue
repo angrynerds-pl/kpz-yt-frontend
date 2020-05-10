@@ -11,8 +11,7 @@
 
     <v-content>
       <v-container>
-        <!-- TODO -->
-        Create playlist form
+        <create-playlist-form @showSnackbar="e=>$emit('showSnackbar', e)" />
       </v-container>
     </v-content>
   </div>
@@ -21,8 +20,13 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
-@Component({})
-export default class Playlist extends Vue {}
+import CreatePlaylistForm from '@/components/playlist/CreatePlaylistForm.vue'
+@Component({
+  components:{
+    CreatePlaylistForm
+  }
+})
+export default class PlaylistCreate extends Vue {}
 </script>
 
 <style

@@ -56,9 +56,11 @@
       <v-btn
         @click="$router.back()"
         :loading="loading"
+        small
         text
+        tabindex="-1"
       >
-        Sign up
+        Sign in
       </v-btn>
       <v-spacer />
       <v-btn
