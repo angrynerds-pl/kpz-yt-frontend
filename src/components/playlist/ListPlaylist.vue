@@ -30,7 +30,6 @@
     <v-dialog
       v-model="addItemDialog"
       max-width="500px"
-      
     >
       <v-card>
         <v-card-title>
@@ -143,6 +142,7 @@ export default class ListPlaylist extends Vue {
             })
             .then(res => {
                 this.playlistItems = res.data.data;
+                
       }).catch(error => {
           console.log(error);
       });
@@ -150,6 +150,21 @@ export default class ListPlaylist extends Vue {
           console.log(error);
       });
 
+      this.playlistItems.forEach(element => {
+        // axios.get(`youtubeapi/videos/${element.ytID}`, {
+        //   headers: { Authorization: this.authHeader }
+        // })
+        // .then(res => {
+        //   const snippet = res.data.data;
+        //   element.name = snippet.title;
+        // })
+        // .catch(error => {
+        //   element.name = '<Unresolved name>';
+        //   console.log(error);
+        // })
+
+        //element.name = "<Unresolved name>";
+      });
 
     if(this.playlist !== undefined)
     {
@@ -163,6 +178,7 @@ export default class ListPlaylist extends Vue {
   forceRerender() {
     this.componentKey += 1;
   }
+
 
 
   submit() {                    //TODO change submit method, reset form after close
