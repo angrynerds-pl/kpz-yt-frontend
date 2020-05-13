@@ -1,5 +1,83 @@
 <template>
   <div>
+    <v-dialog
+      v-model="confirmDialog"
+      max-width="500px"
+    >
+      <v-card>
+        <v-card-title>
+          Confirmation
+        </v-card-title>
+        
+        <v-card-text>
+        Do you really want to delete playlist {{title}} and all of its songs?
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="white"
+            :disabled="loading"
+            @click="confirmDialog=false"
+          >
+            Cancel
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="error"
+            @click="deletePlaylist(`${$route.params.id}`)"
+            :loading="loading"
+          >
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+
+    </v-dialog>
+
+    <v-dialog
+      v-model="changeNameDialog"
+      max-width="500px"
+    >
+      <v-card>
+        <v-card-title>
+          Change name
+        </v-card-title>
+        
+        <v-card-text>
+        <v-alert
+          v-if="alertInfo"
+          color="error"
+          dark
+          dismissible
+          dense
+        >
+          {{ alertInfo }}
+        </v-alert>
+          <v-form>
+            <v-text-field
+              label="New name"
+              prepend-icon="mdi-pencil"
+              v-model="playlistName"
+              :error-messages="this.getErrors($v.playlistName)"
+            />
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="error"
+            :disabled="$v.$error"
+            @click="changeName(`${$route.params.id}`)"
+            :loading="loading"
+          >
+            Change
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+
+    </v-dialog>
+
+    
+
     <v-app-bar
       color="error"
       app
@@ -7,6 +85,23 @@
     >
       <v-app-bar-nav-icon @click="$emit('toggle-nav')"></v-app-bar-nav-icon>
       <v-toolbar-title>{{title}}</v-toolbar-title>
+      <v-spacer />
+
+      <v-btn
+          icon
+          @click.stop="openChangeNameDialog"
+        >
+          <v-icon color="white">mdi-pencil</v-icon>
+        </v-btn>
+
+     
+
+       <v-btn
+          icon
+          @click.stop="confirmDialog=!confirmDialog"
+        >
+          <v-icon color="white">mdi-delete</v-icon>
+        </v-btn>
     </v-app-bar>
 
     <v-content>
@@ -19,22 +114,115 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import bus from '@/main';
 import { Component } from 'vue-property-decorator';
+import { Getter } from 'vuex-class';
+import { User } from '@/store/user';
+import axios from 'axios';
 import ListPlaylist from '../../components/playlist/ListPlaylist.vue'
+import { Validate } from 'vuelidate-property-decorators';
+import { ValidationEvaluation } from 'vue/types/vue';
+import { required } from 'vuelidate/lib/validators';
 @Component({
   components: {
     ListPlaylist
   }
 })
 export default class Playlist extends Vue {
+  @Getter('user/authHeader') authHeader!: string;
+  @Getter('user/user') user!: User;
 
 
+    @Validate({ required })
+    playlistName = '';
+    alertInfo : string | false = false;
+    confirmDialog = false;
+    changeNameDialog = false;
     title = 'title';
+    loading = false;
+
 
     setToolbarTitle(title: string)
     {
       this.title = title;
     }
+
+    openChangeNameDialog()
+    {
+      this.playlistName = this.title;
+      this.changeNameDialog=!this.changeNameDialog;
+    }
+
+    deletePlaylist(playlistId: number)
+    {
+      this.loading = true;
+
+      axios.delete(`/playlists/${playlistId}`, {
+        headers: { Authorization: this.authHeader }
+      })
+    .then(res => {
+      this.confirmDialog = false;
+      bus.$emit('refreshPlaylists');
+      this.$emit('showSnackbar', "Playlist deleted");
+      this.$router.push(`/app`);
+    })
+    .catch(error => {
+      this.$emit('showSnackbar', "Server error");
+      console.log(error);
+    })
+    .finally(()=> {
+      this.loading=false;
+    })
+    }
+
+
+    changeName(playlistId : number) {                    
+    this.alertInfo = false;
+    this.$v.$touch();
+    if (this.$v.$error) {
+      return;
+    }
+    this.loading = true;
+
+
+      axios
+      .put(`playlists/${playlistId}`,
+              {
+                name: this.playlistName
+              },
+              {
+                headers: { Authorization: this.authHeader },
+              })
+      .then(res => {
+        
+        this.changeNameDialog = false;
+        this.$emit('showSnackbar', 'Name changed!');
+        
+        bus.$emit('refreshPlaylists');
+        bus.$emit('refreshPlaylistList');
+        //this.$router.push(`/app/playlists/${res.data.data.id}`);
+      })
+      .catch(error => {
+        this.alertInfo = "Server error";
+        console.error(error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+      
+    
+  }
+
+  getErrors(fieldEval: ValidationEvaluation) {
+    const errors: string[] = [];
+    if (!fieldEval.$dirty) {
+      return errors;
+    }
+    if (!fieldEval.required) {
+      errors.push('Field is required!');
+    }
+    return errors;
+  }
 }
 </script>
 

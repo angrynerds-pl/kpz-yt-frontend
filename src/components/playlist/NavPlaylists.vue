@@ -21,7 +21,7 @@
         <v-btn
           icon
           small
-          @click.stop
+          @click="playlistPlayClicked(`${playlist.id}`)"
         >
           <v-icon color="grey lighten-1">mdi-play</v-icon>
         </v-btn>
@@ -48,8 +48,8 @@
 import Vue from 'vue';
 import bus from '../../main';
 import { Component } from 'vue-property-decorator';
-import { Getter } from 'vuex-class';
-import { Playlist } from '@/store/playlist';
+import { Getter, Mutation } from 'vuex-class';
+import { Playlist, PlaylistItem } from '@/store/playlist';
 import { User } from '@/store/user';
 
 import axios from 'axios';
@@ -57,6 +57,10 @@ import axios from 'axios';
 export default class NavPlaylists extends Vue {
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
+  @Mutation('player/setPlayData') setPlayData!: (payload: {
+    playlistItems: PlaylistItem[];
+    index: number | null;
+  }) => void;
 
   componentKey = 0;
   playlists: Playlist[] = [];
@@ -68,6 +72,33 @@ export default class NavPlaylists extends Vue {
     })
 
     this.updatePlaylists();
+  }
+
+  playlistPlayClicked(playlistId: number) 
+  {
+
+    const payload = {
+      playlistItems: [],
+      index: 0,
+  }
+    
+
+    axios.get(`playlists/${playlistId}/playlist-items`, {
+      headers: { Authorization: this.authHeader }
+    })
+    .then(res => {
+      
+      if(res.data.data !== undefined)
+      {
+        payload.playlistItems = res.data.data;
+      }
+             
+      this.setPlayData(payload);
+                
+    }).catch(error => {
+      this.$emit('showSnackBar', "Server error");
+      console.log(error);
+    });
   }
 
   playlistSelected(playlistId: number) {
