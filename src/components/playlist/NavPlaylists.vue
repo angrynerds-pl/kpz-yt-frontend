@@ -64,19 +64,15 @@ export default class NavPlaylists extends Vue {
   beforeMount() {
 
     bus.$on('refreshPlaylists', () => {
-      this.forceRerender(); 
+      this.updatePlaylists();
     })
 
     this.updatePlaylists();
   }
 
-  beforeUpdate() {
-    this.updatePlaylists();
-  }
-
   playlistSelected(playlistId: number) {
     this.$router.push(`/app/playlists/${playlistId}`);
-    //bus.$emit('refreshPlaylistList');
+    bus.$emit('refreshPlaylistList');
   }
 
 

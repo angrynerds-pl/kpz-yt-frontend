@@ -13,7 +13,7 @@
       </v-list-item-avatar>
 
       <v-list-item-content>
-        <v-list-item-title>{{ playlistItem.name }}</v-list-item-title>
+        <v-list-item-title>{{ playlistItem.ytID }}</v-list-item-title>
       </v-list-item-content>
       <v-list-item-action>
         <!-- TODO: click -->
@@ -99,12 +99,15 @@ import { ValidationEvaluation } from 'vue/types/vue';
 import { required } from 'vuelidate/lib/validators';
 import axios from 'axios';
 import { integer } from 'vuelidate/lib/validators';
+import { Observable } from 'rxjs';
 @Component({})
 export default class ListPlaylist extends Vue {
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
   @Validate({ required })
   playlistItemLink = '';
+  addItemDialog = false;
+  playlistId = -1;
 
 
   loading = false;
@@ -118,24 +121,43 @@ export default class ListPlaylist extends Vue {
   beforeMount() {
 
     bus.$on('refreshPlaylistList', () => {
-      this.forceRerender();
+      this.updatePlaylistItems();
     });
+
+    this.playlistId = parseInt(this.$route.params.id);
     
     this.updatePlaylistItems();
     
   }
 
   beforeUpdate() {
-    this.updatePlaylistItems();
+
+    // if(this.playlistId !== parseInt(this.$route.params.id))
+    // {
+    //   this.playlistId = parseInt(this.$route.params.id);
+    //   this.updatePlaylistItems();
+    // }
+    //this.updatePlaylistItems();
+    //const dwa = 2;
   }
 
   updatePlaylistItems() {
+
+    
     axios
       .get(`playlists/${this.$route.params.id}`, {
         headers: { Authorization: this.authHeader }
       })
       .then(res => {
         this.playlist = res.data.data;
+        if(this.playlist !== undefined)
+        {
+        this.$emit('setToolbarTitle', this.playlist.name);
+        }
+        else
+        {
+        this.$emit('setToolbarTitle', "<Unresolved name>");
+        } 
             axios
             .get(`playlists/${this.$route.params.id}/playlist-items`, {
                 headers: { Authorization: this.authHeader }
@@ -143,36 +165,61 @@ export default class ListPlaylist extends Vue {
             .then(res => {
                 this.playlistItems = res.data.data;
                 
+                
       }).catch(error => {
           console.log(error);
       });
+
+
+
+      //this.forceRerender();
       }).catch(error => {
           console.log(error);
+          this.$emit('setToolbarTitle', "<Unresolved name>");
       });
 
-      this.playlistItems.forEach(element => {
-        // axios.get(`youtubeapi/videos/${element.ytID}`, {
-        //   headers: { Authorization: this.authHeader }
-        // })
-        // .then(res => {
-        //   const snippet = res.data.data;
-        //   element.name = snippet.title;
-        // })
-        // .catch(error => {
-        //   element.name = '<Unresolved name>';
-        //   console.log(error);
-        // })
+    // if(this.playlist !== undefined)
+    // {
+    //   this.$emit('setToolbarTitle', this.playlist.name);
+    // } 
+    // else{
+    //   this.$emit('setToolbarTitle', "<Unresolved name>");
+    // }
 
-        //element.name = "<Unresolved name>";
-      });
 
-    if(this.playlist !== undefined)
-    {
-      this.$emit('setToolbarTitle', this.playlist.name);
-    } 
-    else{
-      this.$emit('setToolbarTitle', "");
-    }
+
+    // this.playlistItems.forEach((element, index, array) => {
+    //     axios.get(`youtubeapi/videos/${element.ytID}`, {
+    //     //axios.get(`youtubeapi/videos/-MZqYDaz4CI`, {
+    //       headers: { Authorization: this.authHeader }
+    //     })
+    //     .then(res => {
+
+    //       const observable : Observable<any> = res.data;
+    //       let ytResponse = { 
+    //         snippet: {
+    //           title : "defaultTitle",
+    //         }
+    //       };
+    //       observable.subscribe(data => {
+    //         ytResponse = data;
+    //       });
+
+    //         array[index].name = ytResponse.snippet.title;
+    //         console.log(ytResponse.snippet);
+          
+    //     })
+    //     .catch(error => {
+    //       array[index].name = '<UnresolvSed name>';
+    //       console.log(error);
+    //     })
+
+    //     //array[index].name = "<Unresolved name>";
+    //   });
+
+
+
+
   }
 
   forceRerender() {
@@ -188,19 +235,40 @@ export default class ListPlaylist extends Vue {
       return;
     }
     this.loading = true;
+
+      let ytID = "";
+      const regex = /^(https:\/\/www\.youtube\.com\/watch\?v=|https:\/\/youtu\.be\/)(?<param>.+)$/;
+
+      
+      const found = this.playlistItemLink.match(regex);
+      if(found !== undefined && found !== null && found.groups !== undefined)
+      {
+        ytID = found.groups.param;
+      }
+      else
+      {
+        this.alertInfo = "Invalid link";
+        this.loading = false;
+        return;
+      }
+
+      console.log(found);
+      ///playlists/{id}/playlist-items
+
       axios
-      .post('/playlists/xd',
+      .post(`playlists/${this.playlistId}/playlist-items`,
               {
-              name: this.playlistItemLink,
-              user: { id: this.user.id }
+              ytID: ytID,
+              playlist: { id: this.playlistId }
               },
               {
                 headers: { Authorization: this.authHeader },
               })
       .then(res => {
-        this.$emit('showSnackbar', 'Playlist created!');
-        bus.$emit('refreshPlaylists');
-        this.$router.push(`/app/playlists/${res.data.data.id}`);
+        this.$emit('showSnackbar', 'Item added!');
+        this.updatePlaylistItems();
+        //bus.$emit('refreshPlaylists');
+        //this.$router.push(`/app/playlists/${res.data.data.id}`);
       })
       .catch(error => {
         this.alertInfo = "Server error";
