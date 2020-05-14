@@ -23,7 +23,7 @@
           icon
           small
           @click.stop="showChangePlaylistDialog(`${playlistItem.id}`)"
-        > <v-icon color="grey lighten-1">mdi-pencil</v-icon>
+        > <v-icon color="grey lighten-1">mdi-content-duplicate</v-icon>
         </v-btn>
 
         <v-btn
@@ -61,13 +61,20 @@
           <v-form>
             <v-text-field
               label="Link"
-              prepend-icon="mdi-pencil"
+              prepend-icon="mdi-link-variant-plus"
               v-model="playlistItemLink"
               :error-messages="this.getErrors($v.playlistItemLink)"
             />
           </v-form>
         </v-card-text>
         <v-card-actions>
+          <v-btn
+            color="white"
+            @click.close="addItemDialog=false"
+            :loading="loading"
+          >
+            Close
+          </v-btn>
           <v-spacer />
           <v-btn
             color="error"
@@ -107,12 +114,26 @@
               item-text="name"
               item-value="id"
               v-model="selected"
-              prepend-icon="mdi-pencil"
+              prepend-icon="mdi-music-box-multiple-outline"
               :options="options"
             />
         </v-card-text>
         <v-card-actions>
+          <v-btn
+            color="white"
+            @click.close="changePlaylistDialog=false"
+            :loading="loading"
+          >
+            Close
+          </v-btn>
           <v-spacer />
+          <v-btn
+            color="white"
+            @click="copyToPlaylist"
+            :loading="loading"
+          >
+            Copy
+          </v-btn>
           <v-btn
             color="error"
             @click="changePlaylist"
@@ -130,7 +151,7 @@
     <v-list-item
       link
       dense
-      @click="addItemDialog=!addItemDialog"
+      @click="openItemAddDialog"
     >
       <v-list-item-avatar>
         <v-icon>mdi-plus</v-icon>
@@ -176,7 +197,7 @@ export default class ListPlaylist extends Vue {
 
 
   changePlaylistDialog = false;
-  selected = null;
+  selected = 0;
   options: Playlist[] = [];
   playlistItemToMove = 0;
 
@@ -197,10 +218,15 @@ export default class ListPlaylist extends Vue {
     
   }
 
-  changePlaylist()
+  openItemAddDialog()
   {
+    this.alertInfo = false;
+    this.addItemDialog=true;
+  }
 
-    if(this.selected == null) 
+  copyToPlaylist()
+  {
+    if(this.selected == 0) 
     {
       this.alertInfo = "Field is required";
       return;
@@ -211,9 +237,93 @@ export default class ListPlaylist extends Vue {
     }
     this.loading = true;
 
-    console.log(this.selected);
+    axios
+      .get(`playlist-items/${this.playlistItemToMove}`,
+              {
+                headers: { Authorization: this.authHeader },
+              })
+      .then(res => {
 
-    this.loading = false;
+        const playlistItemToCopy : PlaylistItem = res.data.data;
+
+        axios
+        .post(`playlists/${this.selected}/playlist-items`,
+              {
+                ytID: playlistItemToCopy.ytID,
+                playlist: {
+                  id: this.selected,
+                }
+              },
+              {
+                headers: { Authorization: this.authHeader },
+              })
+        .then(res => {
+          this.changePlaylistDialog = false;
+
+          this.$emit('showSnackbar', 'Item copied!');
+          bus.$emit('refreshPlaylistList');
+        })
+        .catch (error => {
+          this.alertInfo = "Server error";
+          console.log(error);
+
+        });
+        
+        
+        //this.$router.push(`/app/playlists/${res.data.data.id}`);
+      })
+      .catch(error => {
+        this.alertInfo = "Server error";
+        console.error(error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+
+  }
+
+  changePlaylist()
+  {
+
+    if(this.selected == 0) 
+    {
+      this.alertInfo = "Field is required";
+      return;
+    } 
+    else 
+    {
+      this.alertInfo = false;
+    }
+    this.loading = true;
+
+
+    axios
+      .put(`playlist-items/${this.playlistItemToMove}`,
+              {
+                playlist: {
+                  id: this.selected,
+                } 
+              },
+              {
+                headers: { Authorization: this.authHeader },
+              })
+      .then(res => {
+        
+        this.changePlaylistDialog = false;
+        this.$emit('showSnackbar', 'Item moved!');
+        
+        
+        bus.$emit('refreshPlaylistList');
+        //this.$router.push(`/app/playlists/${res.data.data.id}`);
+      })
+      .catch(error => {
+        this.alertInfo = "Server error";
+        console.error(error);
+      })
+      .finally(() => {
+        this.loading = false;
+      });
+
 
     //TODO update/change playlist in itemplaylist
   }
@@ -228,7 +338,6 @@ export default class ListPlaylist extends Vue {
       })
       .then(res => {
         this.options = res.data.data;
-        console.log(res.data.data)
 
         this.playlistItemToMove = playlistItemId;
         this.changePlaylistDialog=!this.changePlaylistDialog;

@@ -62,6 +62,13 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
+          <v-btn
+            color="white"
+            @click.close="changeNameDialog=false"
+            :loading="loading"
+          >
+            Close
+          </v-btn>
           <v-spacer />
           <v-btn
             color="error"
@@ -106,7 +113,7 @@
 
     <v-content>
       <v-container>
-        <list-playlist @setToolbarTitle="setToolbarTitle"/>
+        <list-playlist @setToolbarTitle="setToolbarTitle" @showSnackbar="e=>$emit('showSnackbar', e)"/>
       </v-container>
     </v-content>
   </div>
