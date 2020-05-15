@@ -14,12 +14,22 @@
       </v-list-item-avatar>
 
       <v-list-item-content>
-        <v-list-item-title>{{ playlistItem.ytID }}</v-list-item-title>
+        <div 
+        class="text-center"
+        v-if="!playlistItem.name">
+        <v-sheet 
+        color="grey lighten-2">{{sheetValue}} 
+        </v-sheet>
+        </div>
+        <div v-else>
+        <v-list-item-title>{{ playlistItem.name }}</v-list-item-title>
+        </div>
       </v-list-item-content>
       <v-list-item-action>
 
         <div class="flex" >
         <v-btn class="mr-4"
+          v-if="playlistItem.name"
           icon
           small
           @click.stop="showChangePlaylistDialog(`${playlistItem.id}`)"
@@ -27,6 +37,7 @@
         </v-btn>
 
         <v-btn
+          v-if="playlistItem.name"
           icon
           small
           @click.stop="itemDeleteClicked(`${playlistItem.id}`)"
@@ -167,6 +178,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import bus from '../../main';
+import { first } from 'rxjs/operators';
+import 'rxjs/add/operator/toPromise';
 import { Component } from 'vue-property-decorator';
 import { Validate } from 'vuelidate-property-decorators';
 import { Getter, Mutation } from 'vuex-class';
@@ -190,6 +203,8 @@ export default class ListPlaylist extends Vue {
   playlistItemLink = '';
   addItemDialog = false;
   playlistId = -1;
+
+  sheetValue = '\0';
 
 
   loading = false;
@@ -236,6 +251,8 @@ export default class ListPlaylist extends Vue {
       this.alertInfo = false;
     }
     this.loading = true;
+
+    
 
     axios
       .get(`playlist-items/${this.playlistItemToMove}`,
@@ -381,75 +398,87 @@ export default class ListPlaylist extends Vue {
 
   }
 
-  updatePlaylistItems() {
+  async updatePlaylistItems() {
 
     
-    axios
+    this.$emit('setToolbarTitle', '');
+
+    try {
+      const response = await axios
       .get(`playlists/${this.$route.params.id}`, {
         headers: { Authorization: this.authHeader }
-      })
-      .then(res => {
-        this.playlist = res.data.data;
-        if(this.playlist !== undefined)
+      });
+
+      this.playlist = response.data.data;
+      if(this.playlist !== undefined)
         {
-        this.$emit('setToolbarTitle', this.playlist.name);
+          this.$emit('setToolbarTitle', this.playlist.name);
         }
         else
         {
-        this.$emit('setToolbarTitle', "<Unresolved name>");
+          this.$emit('setToolbarTitle', "<< Unresolved name >>");
         } 
-            axios
-            .get(`playlists/${this.$route.params.id}/playlist-items`, {
+    } catch(e)
+    {
+      this.$emit('setToolbarTitle', "<< Unresolved name >>");
+      console.log(e);
+      return;
+    }
+
+    try {
+      const response = await axios
+      .get(`playlists/${this.$route.params.id}/playlist-items`, {
                 headers: { Authorization: this.authHeader }
-            })
-            .then(res => {
-                this.playlistItems = res.data.data;
-                
-                
-      }).catch(error => {
-          console.log(error);
-      });
+            });
+
+      this.playlistItems = response.data.data;
+    } catch(e)
+    {
+      console.log(e);
+      return;
+    }
 
 
-      }).catch(error => {
-          console.log(error);
-          this.$emit('setToolbarTitle', "<Unresolved name>");
-      });
+      this.playlistItems.forEach((element, index, arr) => {
+          axios.get(`youtubeapi/videos/${element.ytID}`, {
+          headers: { Authorization: this.authHeader }
+          }).then(res => {
+            console.log(res.data);
+          try{
+            const ytResponse = res.data.items[0].snippet;
 
+            this.$set(this.playlistItems, index, 
+            { 
+            id: element.id,
+            name: ytResponse.title,
+            ytID: element.ytID, 
+            });
 
-
-
-    // this.playlistItems.forEach((element, index, array) => {
-    //     axios.get(`youtubeapi/videos/${element.ytID}`, {
-    //     //axios.get(`youtubeapi/videos/-MZqYDaz4CI`, {
-    //       headers: { Authorization: this.authHeader }
-    //     })
-    //     .then(res => {
-
-    //       const observable : Observable<any> = res.data;
-    //       let ytResponse = { 
-    //         snippet: {
-    //           title : "defaultTitle",
-    //         }
-    //       };
-    //       observable.subscribe(data => {
-    //         ytResponse = data;
-    //       });
-
-    //         array[index].name = ytResponse.snippet.title;
-    //         console.log(ytResponse.snippet);
+          } catch (e)
+          {
+            this.$set(this.playlistItems, index, 
+            { 
+            id: element.id,
+            name: '<< Item not found >>',
+            ytID: element.ytID, 
+            });
+          }
+                    
           
-    //     })
-    //     .catch(error => {
-    //       array[index].name = '<UnresolvSed name>';
-    //       console.log(error);
-    //     })
 
-    //     //array[index].name = "<Unresolved name>";
-    //   });
+          }).catch( e => {
+            this.$set(this.playlistItems, index, 
+            { 
+            id: element.id,
+            name: '<< Error resolving name >>',
+            ytID: element.ytID, 
+            });
+            console.log(e);
+          });
+        }
+      );
 
-
-
+    //this.$forceUpdate();
 
   }
 
