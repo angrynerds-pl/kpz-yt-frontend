@@ -1,11 +1,11 @@
 <script lang="ts">
 import Vue from 'vue';
-import { Bar, mixins } from 'vue-chartjs';
+import { mixins, HorizontalBar } from 'vue-chartjs';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { ChartData, ChartOptions } from 'chart.js';
 
 @Component({
-  extends: Bar,
+  extends: HorizontalBar,
   mixins: [mixins.reactiveProp],
   props: ['chartData', 'options']
 })
