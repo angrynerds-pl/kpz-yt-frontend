@@ -13,6 +13,7 @@
     "ext:clean": "rimraf extension/dist"
   },
   "dependencies": {
+    "@types/chart.js": "^2.9.20",
     "@types/dotenv-webpack": "^1.7.0",
     "@types/jwt-decode": "^2.2.1",
     "@types/lodash": "^4.14.149",
@@ -22,6 +23,7 @@
     "@types/youtube-player": "^5.5.2",
     "arrive": "^2.4.1",
     "axios": "^0.19.2",
+    "chart.js": "^2.9.3",
     "core-js": "^3.6.4",
     "dotenv-webpack": "^1.7.0",
     "element-ready": "^4.1.1",
@@ -30,6 +32,7 @@
     "moment": "^2.24.0",
     "url-parse": "^1.4.7",
     "vue": "^2.6.11",
+    "vue-chartjs": "^3.5.0",
     "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.1.5",
