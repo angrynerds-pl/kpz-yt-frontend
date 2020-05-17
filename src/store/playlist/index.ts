@@ -23,11 +23,10 @@ export interface PlaylistState {
 }
 
 const state: PlaylistState = {
-  playlist: undefined,
-}
+  playlist: undefined
+};
 
-
-export const player: Module<PlaylistState, RootState> = {
+export const playlist: Module<PlaylistState, RootState> = {
   namespaced: true,
   state,
   getters,

@@ -36,10 +36,11 @@
               </v-icon>
             </v-sheet>
             {{ item ? item.name : 'Pick a song' }}
-             <v-icon
-             large
+            <v-icon
+              large
               @click="redirect"
-              class="ml-4">
+              class="ml-4"
+            >
               mdi-play-box
             </v-icon>
           </v-col>
@@ -279,7 +280,13 @@ export default class Player extends Vue {
   async redirect() {
     if (this.player && this.item) {
       this.pause();
-      window.open('https://youtu.be/' + this.item.ytID + '?t=' + Math.floor(this.currentDuration), '_blank');
+      window.open(
+        'https://youtu.be/' +
+          this.item.ytID +
+          '?t=' +
+          Math.floor(this.currentDuration),
+        '_blank'
+      );
     }
   }
 

@@ -1,11 +1,11 @@
 <template>
-    <v-card>
-          <v-card-title class="text-upper">
-          Create new empty playlist
-          </v-card-title>
-        <v-card-subtitle>
-          Hide your embarrassing songs under a catchy name.
-        </v-card-subtitle>
+  <v-card>
+    <v-card-title class="text-upper">
+      Create new empty playlist
+    </v-card-title>
+    <v-card-subtitle>
+      Hide your embarrassing songs under a catchy name.
+    </v-card-subtitle>
 
     <v-card-text>
       <v-alert
@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import bus from '../../main'
+import bus from '../../main';
 import Vue from 'vue';
 import axios from 'axios';
 import { Component } from 'vue-property-decorator';
@@ -69,29 +69,29 @@ export default class CreatePlaylistForm extends Vue {
       return;
     }
     this.loading = true;
-      axios
-      .post('/playlists',
-              {
-              name: this.playlistName,
-              user: { id: this.user.id }
-              },
-              {
-                headers: { Authorization: this.authHeader },
-              })
+    axios
+      .post(
+        '/playlists',
+        {
+          name: this.playlistName,
+          user: { id: this.user.id }
+        },
+        {
+          headers: { Authorization: this.authHeader }
+        }
+      )
       .then(res => {
         this.$emit('showSnackbar', 'Playlist created!');
         bus.$emit('refreshPlaylists');
         this.$router.push(`/app/playlists/${res.data.data.id}`);
       })
       .catch(error => {
-        this.alertInfo = "Server error";
+        this.alertInfo = 'Server error';
         console.error(error);
       })
       .finally(() => {
         this.loading = false;
       });
-      
-    
   }
 
   getErrors(fieldEval: ValidationEvaluation) {
@@ -106,4 +106,3 @@ export default class CreatePlaylistForm extends Vue {
   }
 }
 </script>
-

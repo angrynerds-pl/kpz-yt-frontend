@@ -56,9 +56,10 @@
       </v-list>
     </v-navigation-drawer>
 
-    <router-view  
-    @toggle-nav="nav = !nav" 
-    @showSnackbar="showSnackbar">
+    <router-view
+      @toggle-nav="nav = !nav"
+      @showSnackbar="showSnackbar"
+    >
     </router-view>
 
     <player />

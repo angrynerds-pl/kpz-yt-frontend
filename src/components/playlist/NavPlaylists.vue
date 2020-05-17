@@ -74,39 +74,34 @@ export default class NavPlaylists extends Vue {
   playlists: Playlist[] = [];
 
   beforeMount() {
-
     bus.$on('refreshPlaylists', () => {
       this.updatePlaylists();
-    })
+    });
 
     this.updatePlaylists();
   }
 
-  playlistPlayClicked(playlistId: number) 
-  {
-
+  playlistPlayClicked(playlistId: number) {
     const payload = {
       playlistItems: [],
-      index: 0,
-  }
-    
+      index: 0
+    };
 
-    axios.get(`playlists/${playlistId}/playlist-items`, {
-      headers: { Authorization: this.authHeader }
-    })
-    .then(res => {
-      
-      if(res.data.data !== undefined)
-      {
-        payload.playlistItems = res.data.data;
-      }
-             
-      this.setPlayData(payload);
-                
-    }).catch(error => {
-      this.$emit('showSnackBar', "Server error");
-      console.log(error);
-    });
+    axios
+      .get(`playlists/${playlistId}/playlist-items`, {
+        headers: { Authorization: this.authHeader }
+      })
+      .then(res => {
+        if (res.data.data !== undefined) {
+          payload.playlistItems = res.data.data;
+        }
+
+        this.setPlayData(payload);
+      })
+      .catch(error => {
+        this.$emit('showSnackBar', 'Server error');
+        console.log(error);
+      });
   }
 
   playlistSelected(playlistId: number) {
@@ -114,8 +109,7 @@ export default class NavPlaylists extends Vue {
     bus.$emit('refreshPlaylistList');
   }
 
-
-  updatePlaylists(){
+  updatePlaylists() {
     axios
       .get(`users/${this.user.id}/playlists`, {
         headers: { Authorization: this.authHeader }
