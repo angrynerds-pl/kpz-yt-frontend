@@ -9,14 +9,52 @@
       <v-toolbar-title>Your profile</v-toolbar-title>
     </v-app-bar>
 
-    <v-content>
+   <v-content> 
+    <v-form>
       <v-container>
-        <!-- TODO -->
-        Info, avatar and edit options here
-        <pre>{{ JSON.stringify(user, null, 2) }}</pre>
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              label="Username"
+              :value=user.username
+              outlined
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" sm="6">
+            <v-text-field
+              label="First name"
+              :value=user.firstname
+              outlined
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" sm="6">
+            <v-text-field
+              label="Last name"
+              :value=user.lastname
+              outlined
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" sm="6">
+            <v-text-field
+              type="password"
+              label="New password"
+              hint="Enter new password"
+              outlined
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-btn
+            color="error"
+          >
+            Apply changes
+            </v-btn>
       </v-container>
-    </v-content>
-  </div>
+    </v-form>
+  </v-content>
+</div>
 </template>
 
 <script lang="ts">
