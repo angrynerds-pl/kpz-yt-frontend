@@ -30,6 +30,7 @@
           type="password"
           v-model="password"
           :error-messages="this.getErrors($v.password)"
+          @keydown.enter="submit"
         />
       </v-form>
     </v-card-text>
