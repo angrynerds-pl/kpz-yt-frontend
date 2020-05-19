@@ -11,7 +11,10 @@
 
     <v-content>
       <v-container>
-        <create-playlist-form @showSnackbar="e => $emit('showSnackbar', e)" />
+        <create-playlist-form
+          @showSnackbar="e => $emit('showSnackbar', e)"
+          @updatePlaylists="() => $emit('updatePlaylists')"
+        />
       </v-container>
     </v-content>
   </div>

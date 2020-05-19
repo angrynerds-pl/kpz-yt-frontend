@@ -171,33 +171,32 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import bus from '../../main';
-import { first } from 'rxjs/operators';
-import 'rxjs/add/operator/toPromise';
-import { Component } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import { Validate } from 'vuelidate-property-decorators';
-import { Getter, Mutation } from 'vuex-class';
+import { Getter, Action } from 'vuex-class';
 import { Playlist, PlaylistItem } from '@/store/playlist';
 import { User } from '@/store/user';
 import { ValidationEvaluation } from 'vue/types/vue';
 import { required } from 'vuelidate/lib/validators';
 import axios from 'axios';
-import { integer } from 'vuelidate/lib/validators';
-import { Observable } from 'rxjs';
 @Component({})
 export default class ListPlaylist extends Vue {
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
-  @Mutation('player/setPlayData') setPlayData!: (payload: {
+  @Action('player/fetchName') fetchName!: (ytID: string) => Promise<any>;
+  @Action('player/setPlayDataFetch') setPlayData!: (payload: {
     playlistItems: PlaylistItem[];
     index: number | null;
   }) => void;
 
+  @Watch('$route', { immediate: true, deep: true })
+  onUrlChange() {
+    this.updatePlaylistItems();
+  }
+
   @Validate({ required })
   playlistItemLink = '';
   addItemDialog = false;
-  playlistId = -1;
-
   sheetValue = '\0';
 
   loading = false;
@@ -213,18 +212,13 @@ export default class ListPlaylist extends Vue {
   componentKey = 0;
 
   beforeMount() {
-    bus.$on('refreshPlaylistList', () => {
-      this.updatePlaylistItems();
-    });
-
-    this.playlistId = parseInt(this.$route.params.id);
-
     this.updatePlaylistItems();
   }
 
   openItemAddDialog() {
-    this.alertInfo = false;
     this.addItemDialog = true;
+    this.playlistItemLink = '';
+    this.$v.$reset();
   }
 
   copyToPlaylist() {
@@ -256,22 +250,18 @@ export default class ListPlaylist extends Vue {
               headers: { Authorization: this.authHeader }
             }
           )
-          .then(res => {
-            this.changePlaylistDialog = false;
+          .then(() => {
+            if (this.selected.toString() === this.$route.params.id) {
+              this.updatePlaylistItems();
+            }
 
+            this.changePlaylistDialog = false;
             this.$emit('showSnackbar', 'Item copied!');
-            bus.$emit('refreshPlaylistList');
           })
           .catch(error => {
             this.alertInfo = 'Server error';
             console.log(error);
           });
-
-        //this.$router.push(`/app/playlists/${res.data.data.id}`);
-      })
-      .catch(error => {
-        this.alertInfo = 'Server error';
-        console.error(error);
       })
       .finally(() => {
         this.loading = false;
@@ -287,6 +277,12 @@ export default class ListPlaylist extends Vue {
     }
     this.loading = true;
 
+    if (this.selected.toString() === this.$route.params.id) {
+      this.changePlaylistDialog = false;
+      this.loading = false;
+      return;
+    }
+
     axios
       .put(
         `playlist-items/${this.playlistItemToMove}`,
@@ -299,12 +295,10 @@ export default class ListPlaylist extends Vue {
           headers: { Authorization: this.authHeader }
         }
       )
-      .then(res => {
+      .then(() => {
+        this.updatePlaylistItems();
         this.changePlaylistDialog = false;
         this.$emit('showSnackbar', 'Item moved!');
-
-        bus.$emit('refreshPlaylistList');
-        //this.$router.push(`/app/playlists/${res.data.data.id}`);
       })
       .catch(error => {
         this.alertInfo = 'Server error';
@@ -313,8 +307,6 @@ export default class ListPlaylist extends Vue {
       .finally(() => {
         this.loading = false;
       });
-
-    //TODO update/change playlist in itemplaylist
   }
 
   showChangePlaylistDialog(playlistItemId: number) {
@@ -339,7 +331,7 @@ export default class ListPlaylist extends Vue {
       .delete(`/playlist-items/${itemId}`, {
         headers: { Authorization: this.authHeader }
       })
-      .then(res => {
+      .then(() => {
         this.$emit('showSnackbar', 'Item deleted');
         this.updatePlaylistItems();
       })
@@ -397,13 +389,9 @@ export default class ListPlaylist extends Vue {
       return;
     }
 
-    this.playlistItems.forEach((element, index, arr) => {
-      axios
-        .get(`youtubeapi/videos/${element.ytID}`, {
-          headers: { Authorization: this.authHeader }
-        })
+    this.playlistItems.forEach((element, index) => {
+      this.fetchName(element.ytID)
         .then(res => {
-          console.log(res.data);
           try {
             const ytResponse = res.data.items[0].snippet;
 
@@ -429,12 +417,6 @@ export default class ListPlaylist extends Vue {
           console.log(e);
         });
     });
-
-    //this.$forceUpdate();
-  }
-
-  forceRerender() {
-    this.componentKey += 1;
   }
 
   submit() {
@@ -459,16 +441,16 @@ export default class ListPlaylist extends Vue {
 
     axios
       .post(
-        `playlists/${this.playlistId}/playlist-items`,
+        `playlists/${this.$route.params.id}/playlist-items`,
         {
           ytID: ytID,
-          playlist: { id: this.playlistId }
+          playlist: { id: this.$route.params.id }
         },
         {
           headers: { Authorization: this.authHeader }
         }
       )
-      .then(res => {
+      .then(() => {
         this.addItemDialog = false;
         this.$emit('showSnackbar', 'Item added!');
         this.updatePlaylistItems();

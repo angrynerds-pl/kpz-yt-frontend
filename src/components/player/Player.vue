@@ -182,7 +182,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component, Watch } from 'vue-property-decorator';
-import { Getter, Mutation, State } from 'vuex-class';
+import { Getter, Mutation } from 'vuex-class';
 import YouTubePlayerC from 'youtube-player';
 import { YouTubePlayer } from 'youtube-player/dist/types';
 import { PlaylistItem } from '../../store/playlist';

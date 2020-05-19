@@ -10,9 +10,6 @@ Vue.config.productionTip = false;
 Vue.use(Vuelidate);
 axios.defaults.baseURL = `${process.env.VUE_APP_ROOT_API}`;
 
-const bus = new Vue();
-export default bus;
-
 new Vue({
   router,
   store,

@@ -92,6 +92,7 @@
       <v-spacer />
 
       <v-btn
+        v-if="title !== ''"
         icon
         @click.stop="openChangeNameDialog"
       >
@@ -99,6 +100,7 @@
       </v-btn>
 
       <v-btn
+        v-if="title !== ''"
         icon
         @click.stop="confirmDialog = !confirmDialog"
       >
@@ -119,7 +121,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import bus from '@/main';
 import { Component } from 'vue-property-decorator';
 import { Getter } from 'vuex-class';
 import { User } from '@/store/user';
@@ -142,7 +143,7 @@ export default class Playlist extends Vue {
   alertInfo: string | false = false;
   confirmDialog = false;
   changeNameDialog = false;
-  title = 'title';
+  title = '';
   loading = false;
 
   setToolbarTitle(title: string) {
@@ -161,9 +162,9 @@ export default class Playlist extends Vue {
       .delete(`/playlists/${playlistId}`, {
         headers: { Authorization: this.authHeader }
       })
-      .then(res => {
+      .then(() => {
         this.confirmDialog = false;
-        bus.$emit('refreshPlaylists');
+        this.$emit('updatePlaylists');
         this.$emit('showSnackbar', 'Playlist deleted');
         this.$router.push(`/app`);
       })
@@ -194,13 +195,12 @@ export default class Playlist extends Vue {
           headers: { Authorization: this.authHeader }
         }
       )
-      .then(res => {
+      .then(() => {
         this.changeNameDialog = false;
         this.$emit('showSnackbar', 'Name changed!');
 
-        bus.$emit('refreshPlaylists');
-        bus.$emit('refreshPlaylistList');
-        //this.$router.push(`/app/playlists/${res.data.data.id}`);
+        this.$emit('updatePlaylists');
+        this.setToolbarTitle(this.playlistName);
       })
       .catch(error => {
         this.alertInfo = 'Server error';

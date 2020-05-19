@@ -19,6 +19,7 @@
       </v-alert>
       <v-form>
         <v-text-field
+          @keydown.enter.prevent="submit"
           label="Playlist name"
           prepend-icon="mdi-pencil"
           v-model="playlistName"
@@ -41,17 +42,14 @@
 </template>
 
 <script lang="ts">
-import bus from '../../main';
 import Vue from 'vue';
 import axios from 'axios';
 import { Component } from 'vue-property-decorator';
 import { Validate } from 'vuelidate-property-decorators';
 import { required } from 'vuelidate/lib/validators';
 import { ValidationEvaluation } from 'vue/types/vue';
-import { Action } from 'vuex-class';
 import { Getter } from 'vuex-class';
 import { User } from '@/store/user';
-import { AxiosPromise } from 'axios';
 @Component({})
 export default class CreatePlaylistForm extends Vue {
   @Getter('user/authHeader') authHeader!: string;
@@ -82,7 +80,7 @@ export default class CreatePlaylistForm extends Vue {
       )
       .then(res => {
         this.$emit('showSnackbar', 'Playlist created!');
-        bus.$emit('refreshPlaylists');
+        this.$emit('updatePlaylists');
         this.$router.push(`/app/playlists/${res.data.data.id}`);
       })
       .catch(error => {

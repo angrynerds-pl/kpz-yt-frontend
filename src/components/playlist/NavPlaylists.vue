@@ -17,11 +17,10 @@
         <v-list-item-title>{{ playlist.name }}</v-list-item-title>
       </v-list-item-content>
       <v-list-item-action>
-        <!-- TODO: click -->
         <v-btn
           icon
           small
-          @click="playlistPlayClicked(`${playlist.id}`)"
+          @click.stop="playlistPlayClicked(`${playlist.id}`)"
         >
           <v-icon color="grey lighten-1">mdi-play</v-icon>
         </v-btn>
@@ -54,32 +53,23 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import bus from '../../main';
-import { Component } from 'vue-property-decorator';
-import { Getter, Mutation } from 'vuex-class';
+import { Component, Prop } from 'vue-property-decorator';
+import { Getter, Action } from 'vuex-class';
 import { Playlist, PlaylistItem } from '@/store/playlist';
 import { User } from '@/store/user';
 
 import axios from 'axios';
 @Component({})
 export default class NavPlaylists extends Vue {
+  @Prop({ default: [] })
+  playlists: Playlist[] = [];
+
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
-  @Mutation('player/setPlayData') setPlayData!: (payload: {
+  @Action('player/setPlayDataFetch') setPlayData!: (payload: {
     playlistItems: PlaylistItem[];
     index: number | null;
   }) => void;
-
-  componentKey = 0;
-  playlists: Playlist[] = [];
-
-  beforeMount() {
-    bus.$on('refreshPlaylists', () => {
-      this.updatePlaylists();
-    });
-
-    this.updatePlaylists();
-  }
 
   playlistPlayClicked(playlistId: number) {
     const payload = {
@@ -106,21 +96,6 @@ export default class NavPlaylists extends Vue {
 
   playlistSelected(playlistId: number) {
     this.$router.push(`/app/playlists/${playlistId}`);
-    bus.$emit('refreshPlaylistList');
-  }
-
-  updatePlaylists() {
-    axios
-      .get(`users/${this.user.id}/playlists`, {
-        headers: { Authorization: this.authHeader }
-      })
-      .then(res => {
-        this.playlists = res.data.data;
-      });
-  }
-
-  forceRerender() {
-    this.componentKey += 1;
   }
 }
 </script>

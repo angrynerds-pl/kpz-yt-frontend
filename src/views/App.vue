@@ -52,13 +52,14 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-        <nav-playlists />
+        <nav-playlists v-bind:playlists="playlists" />
       </v-list>
     </v-navigation-drawer>
 
     <router-view
       @toggle-nav="nav = !nav"
       @showSnackbar="showSnackbar"
+      @updatePlaylists="updatePlaylists"
     >
     </router-view>
 
@@ -83,21 +84,26 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import axios from 'axios';
 import { Component } from 'vue-property-decorator';
 import { Getter, Mutation } from 'vuex-class';
 import NavPlaylists from '@/components/playlist/NavPlaylists.vue';
 import Player from '@/components/player/Player.vue';
-import { PlaylistItem } from '../store/playlist';
-import User from './User.vue';
+import { Playlist, PlaylistItem } from '../store/playlist';
+//import User from './User.vue';
+import { User } from '@/store/user';
 
 @Component({
   components: { NavPlaylists, Player }
 })
 export default class App extends Vue {
+  @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
   @Mutation('user/setUser') setUser!: () => void;
   @Mutation('user/logout') logoutMutation!: () => void;
   nav = this.$vuetify.breakpoint.lgAndUp;
+
+  playlists: Playlist[] = [];
 
   /* TEST */
   @Mutation('player/setPlayData') setPlayData!: (payload: {
@@ -124,6 +130,8 @@ export default class App extends Vue {
         index: 1
       });
     }, 500);
+
+    this.updatePlaylists();
   }
   /* TEST */
 
@@ -142,6 +150,16 @@ export default class App extends Vue {
   showSnackbar(info: string) {
     this.snackbarInfo = info;
     this.snackbarVisible = true;
+  }
+
+  updatePlaylists() {
+    axios
+      .get(`users/${this.user.id}/playlists`, {
+        headers: { Authorization: this.authHeader }
+      })
+      .then(res => {
+        this.playlists = res.data.data;
+      });
   }
 }
 </script>
