@@ -57,7 +57,7 @@
     </v-navigation-drawer>
 
     <router-view @toggle-nav="nav = !nav"></router-view>
-
+    
     <player />
   </v-app>
 </template>
@@ -69,14 +69,14 @@ import { Getter, Mutation } from 'vuex-class';
 import NavPlaylists from '@/components/playlist/NavPlaylists.vue';
 import Player from '@/components/player/Player.vue';
 import { PlaylistItem } from '../store/playlist';
-import User from './User.vue';
+import UserForm from './UserForm.vue';
 
 @Component({
   components: { NavPlaylists, Player }
 })
 export default class App extends Vue {
-  @Getter('user/user') user!: User;
-  @Mutation('user/setUser') setUser!: () => void;
+  @Getter('user/user') user!: UserForm;
+  @Mutation('user/setUserFromToken') setUserFromToken!: () => void;
   @Mutation('user/logout') logoutMutation!: () => void;
   nav = this.$vuetify.breakpoint.lgAndUp;
 
@@ -109,7 +109,7 @@ export default class App extends Vue {
   /* TEST */
 
   beforeMount() {
-    this.setUser();
+    this.setUserFromToken();
   }
 
   logout() {
