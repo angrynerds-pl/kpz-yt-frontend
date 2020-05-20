@@ -7,12 +7,16 @@ export const mutations: MutationTree<UserState> = {
     localStorage.setItem('access_token', token);
   },
 
-  setUser(state) {
+  setUserFromToken(state) {
     const decoded = jwtDecode(state.token || '') as { id: number; user: User };
     if (decoded && decoded.user) {
       state.user = decoded.user;
     }
   },
+
+  setUser(state, user:User){
+    state.user = user
+  }, 
 
   logout(state) {
     state.user = undefined;
