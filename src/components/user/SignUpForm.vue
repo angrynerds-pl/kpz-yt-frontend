@@ -49,6 +49,7 @@
           type="password"
           v-model="passwordRepeat"
           :error-messages="this.getErrors($v.passwordRepeat)"
+          @keydown.enter="submit"
         />
       </v-form>
     </v-card-text>
