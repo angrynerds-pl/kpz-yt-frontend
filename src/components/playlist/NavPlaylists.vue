@@ -6,8 +6,10 @@
       :key="playlist.id"
       @click="playlistSelected(`${playlist.id}`)"
       :class="
-            `/app/playlists/${playlist.id}` === $route.path ? 'v-item--active v-list-item--active' : ''
-          "
+        `/app/playlists/${playlist.id}` === $route.path
+          ? 'v-item--active v-list-item--active'
+          : ''
+      "
     >
       <v-list-item-avatar
         color="grey lighten-5"

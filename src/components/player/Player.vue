@@ -260,7 +260,7 @@ export default class Player extends Vue {
     );
     this.player.setSize(this.playerWidth, this.playerHeight);
     this.onVolumeChange(this.volume);
-    this.onMuteChange(this.isMuted);
+    this.onMuteChange();
     this.player.on('stateChange', v => {
       this.playing = v.data == PlayerStates.PLAYING;
       if (v.data == PlayerStates.ENDED) {
@@ -334,7 +334,7 @@ export default class Player extends Vue {
   }
 
   @Watch('isMuted')
-  onMuteChange(v: boolean) {
+  onMuteChange() {
     if (this.player)
       if (this.isMuted) this.player.mute();
       else this.player.unMute();
@@ -365,7 +365,7 @@ export default class Player extends Vue {
         headers: { Authorization: this.authHeader }
       });
       const item = res.data.data;
-      const incRes = await Axios.put(
+      await Axios.put(
         `playlist-items/${id}`,
         {
           playbackCount: item.playbackCount + 1

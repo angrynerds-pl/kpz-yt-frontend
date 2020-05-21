@@ -98,7 +98,6 @@ import { Getter, Mutation } from 'vuex-class';
 import NavPlaylists from '@/components/playlist/NavPlaylists.vue';
 import Player from '@/components/player/Player.vue';
 import { PlaylistItem, Playlist } from '../store/playlist';
-import UserForm from './UserForm.vue';
 import { User } from '../store/user';
 
 @Component({
@@ -118,26 +117,6 @@ export default class App extends Vue {
     index: number | null;
   }) => void;
   mounted() {
-    /*     setTimeout(() => {
-      this.setPlayData({
-        playlistItems: [
-          {
-            name: 'Rick Astley - Never Gonna Give You Up (Video)',
-            ytID: 'dQw4w9WgXcQ'
-          },
-          {
-            name: 'Lacheque - DRAGONFRUIT SALAD',
-            ytID: 'hWCs7fsl3QA'
-          },
-          {
-            name: 'Yutaka - Dragonfly',
-            ytID: '2Il1OtvmVSg'
-          }
-        ],
-        index: 1
-      });
-    }, 500); */
-
     this.updatePlaylists();
   }
 

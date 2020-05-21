@@ -178,12 +178,14 @@ import { Playlist, PlaylistItem } from '@/store/playlist';
 import { User } from '@/store/user';
 import { ValidationEvaluation } from 'vue/types/vue';
 import { required } from 'vuelidate/lib/validators';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 @Component({})
 export default class ListPlaylist extends Vue {
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
-  @Action('player/fetchName') fetchName!: (ytID: string) => Promise<any>;
+  @Action('player/fetchName') fetchName!: (
+    ytID: string
+  ) => Promise<AxiosResponse>;
   @Action('player/setPlayDataFetch') setPlayData!: (payload: {
     playlistItems: PlaylistItem[];
     index: number | null;
