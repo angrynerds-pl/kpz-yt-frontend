@@ -5,6 +5,9 @@
       v-for="playlist in playlists"
       :key="playlist.id"
       @click="playlistSelected(`${playlist.id}`)"
+      :class="
+            `/app/playlists/${playlist.id}` === $route.path ? 'v-item--active v-list-item--active' : ''
+          "
     >
       <v-list-item-avatar
         color="grey lighten-5"
@@ -38,7 +41,7 @@
       link
       dense
       @click="$router.push('/app/playlists')"
-      style="position:fixed;bottom:0;width:88%;background:#fff;"
+      style="position:fixed;bottom:0;width: calc(100% - 16px); background:#fff;"
     >
       <v-list-item-avatar>
         <v-icon>mdi-plus</v-icon>
@@ -61,8 +64,7 @@ import { User } from '@/store/user';
 import axios from 'axios';
 @Component({})
 export default class NavPlaylists extends Vue {
-  @Prop({ default: [] })
-  playlists: Playlist[] = [];
+  @Prop({ default: [] }) playlists!: Playlist[];
 
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
@@ -76,7 +78,6 @@ export default class NavPlaylists extends Vue {
       playlistItems: [],
       index: 0
     };
-
     axios
       .get(`playlists/${playlistId}/playlist-items`, {
         headers: { Authorization: this.authHeader }
@@ -85,7 +86,6 @@ export default class NavPlaylists extends Vue {
         if (res.data.data !== undefined) {
           payload.playlistItems = res.data.data;
         }
-
         this.setPlayData(payload);
       })
       .catch(error => {

@@ -12,6 +12,11 @@
           two-line
           @click="$router.push('/app/user')"
           title="Go to profile"
+          :class="
+            '/app/user' === $route.path
+              ? 'v-item--active v-list-item--active'
+              : ''
+          "
         >
           <v-list-item-avatar tile>
             <img
@@ -39,6 +44,9 @@
         <v-list-item
           link
           @click="$router.push(`/app`)"
+          :class="
+            '/app' === $route.path ? 'v-item--active v-list-item--active' : ''
+          "
         >
           <v-list-item-avatar
             color="grey lighten-5"
@@ -105,13 +113,12 @@ export default class App extends Vue {
 
   playlists: Playlist[] = [];
 
-  /* TEST */
   @Mutation('player/setPlayData') setPlayData!: (payload: {
     playlistItems: PlaylistItem[];
     index: number | null;
   }) => void;
   mounted() {
-    setTimeout(() => {
+    /*     setTimeout(() => {
       this.setPlayData({
         playlistItems: [
           {
@@ -129,11 +136,10 @@ export default class App extends Vue {
         ],
         index: 1
       });
-    }, 500);
+    }, 500); */
 
     this.updatePlaylists();
   }
-  /* TEST */
 
   beforeMount() {
     this.setUserFromToken();

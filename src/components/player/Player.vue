@@ -189,6 +189,7 @@ import { PlaylistItem } from '../../store/playlist';
 import moment from 'moment';
 import { RepeatMode } from '../../store/player';
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
+import Axios from 'axios';
 @Component({
   filters: {
     durationFilter: (v: number) => {
@@ -206,6 +207,7 @@ import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
 })
 export default class Player extends Vue {
   RepeatMode = RepeatMode;
+  @Getter('user/authHeader') authHeader!: string;
   @Getter('player/isShuffle') isShuffle!: boolean;
   @Getter('player/repeatMode') repeatMode!: boolean;
   @Getter('player/isItemSet') isItemSet!: boolean;
@@ -353,6 +355,27 @@ export default class Player extends Vue {
           }
         }
       }, 100);
+      if (v.id) await this.sendPlayInfo(v.id);
+    }
+  }
+
+  async sendPlayInfo(id: number) {
+    try {
+      const res = await Axios.get(`playlist-items/${id}`, {
+        headers: { Authorization: this.authHeader }
+      });
+      const item = res.data.data;
+      const incRes = await Axios.put(
+        `playlist-items/${id}`,
+        {
+          playbackCount: item.playbackCount + 1
+        },
+        {
+          headers: { Authorization: this.authHeader }
+        }
+      );
+    } catch (e) {
+      console.log(e);
     }
   }
 }

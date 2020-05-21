@@ -15,11 +15,12 @@
           <v-row>
             <v-col
               cols="12"
-              sm="6"
+              sm="12"
             >
               <v-text-field
                 :value="user.username"
                 disabled
+                prepend-icon="mdi-account"
                 label="Username"
               ></v-text-field>
             </v-col>
@@ -29,6 +30,7 @@
               sm="6"
             >
               <v-text-field
+                prepend-icon="mdi-format-text"
                 v-model="firstname"
                 label="First name"
                 :error-messages="this.getErrors($v.firstname)"
@@ -40,6 +42,7 @@
               sm="6"
             >
               <v-text-field
+                prepend-icon="mdi-format-text"
                 v-model="lastname"
                 label="Last name"
                 :error-messages="this.getErrors($v.lastname)"
@@ -52,10 +55,24 @@
             >
               <v-text-field
                 v-model="password"
+                prepend-icon="mdi-lock"
                 type="password"
                 label="New password"
                 hint="Enter new password"
                 :error-messages="this.getErrors($v.password)"
+              ></v-text-field>
+            </v-col>
+            <v-col
+              cols="12"
+              sm="6"
+            >
+              <v-text-field
+                v-model="passwordRepeat"
+                type="password"
+                prepend-icon="mdi-lock-alert"
+                label="Repeat new password"
+                hint="Enter new password"
+                :error-messages="this.getErrors($v.passwordRepeat)"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -75,7 +92,7 @@
               <v-card-title class="headline">Confirmation</v-card-title>
 
               <v-card-text>
-                Are you sure to change your account credentials?
+                Are you sure to change your account data?
               </v-card-text>
 
               <v-card-actions>
@@ -110,7 +127,7 @@ import { Component } from 'vue-property-decorator';
 import { User } from '@/store/user';
 import { Getter, Mutation } from 'vuex-class';
 import { Validate } from 'vuelidate-property-decorators';
-import { required, minLength, alpha } from 'vuelidate/lib/validators';
+import { required, minLength, alpha, sameAs } from 'vuelidate/lib/validators';
 import axios from 'axios';
 import { ValidationEvaluation } from 'vue/types/vue';
 @Component({})
@@ -125,9 +142,10 @@ export default class UserForm extends Vue {
   lastname = '';
   @Validate({ minLength: minLength(8) })
   password = '';
+  @Validate({ sameAs: sameAs('password') })
+  passwordRepeat = '';
 
   beforeMount() {
-    this.$v.$touch();
     this.updateUi();
   }
 
@@ -135,6 +153,7 @@ export default class UserForm extends Vue {
     this.firstname = this.user.firstname;
     this.lastname = this.user.lastname;
     this.password = '';
+    this.passwordRepeat = '';
   }
 
   getErrors(fieldVal: ValidationEvaluation) {
@@ -151,11 +170,14 @@ export default class UserForm extends Vue {
     if (fieldVal.alpha == false) {
       errors.push('Field must only contain alphabet characters!');
     }
-
+    if (fieldVal.sameAs === false) {
+      errors.push('Passwords must match!');
+    }
     return errors;
   }
   submit() {
     this.changeUserDialog = false;
+    this.$v.$touch();
     if (this.$v.$error) {
       this.updateUi();
       return;
@@ -181,8 +203,13 @@ export default class UserForm extends Vue {
         console.log(error);
       });
     this.password = '';
+    this.passwordRepeat = '';
   }
   openDialog() {
+    this.$v.$touch();
+    if (this.$v.$error) {
+      return;
+    }
     this.changeUserDialog = true;
   }
 }
