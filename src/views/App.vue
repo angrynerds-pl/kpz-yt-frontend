@@ -89,18 +89,18 @@ import { Component } from 'vue-property-decorator';
 import { Getter, Mutation } from 'vuex-class';
 import NavPlaylists from '@/components/playlist/NavPlaylists.vue';
 import Player from '@/components/player/Player.vue';
-import { Playlist, PlaylistItem } from '../store/playlist';
-//import User from './User.vue';
-import { User } from '@/store/user';
+import { PlaylistItem, Playlist } from '../store/playlist';
+import UserForm from './UserForm.vue';
+import { User } from '../store/user';
 
 @Component({
   components: { NavPlaylists, Player }
 })
 export default class App extends Vue {
-  @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
-  @Mutation('user/setUser') setUser!: () => void;
+  @Mutation('user/setUserFromToken') setUserFromToken!: () => void;
   @Mutation('user/logout') logoutMutation!: () => void;
+  @Getter('user/authHeader') authHeader!: string;
   nav = this.$vuetify.breakpoint.lgAndUp;
 
   playlists: Playlist[] = [];
@@ -136,7 +136,7 @@ export default class App extends Vue {
   /* TEST */
 
   beforeMount() {
-    this.setUser();
+    this.setUserFromToken();
   }
 
   logout() {

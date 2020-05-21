@@ -8,7 +8,7 @@ export const actions: ActionTree<UserState, RootState> = {
     return Axios.post('sessions', { username, password })
       .then((response: AxiosResponse) => {
         context.commit('login', response.data.access_token);
-        context.commit('setUser');
+        context.commit('setUserFromToken');
         return Promise.resolve(response);
       })
       .catch((err: AxiosError) => {
