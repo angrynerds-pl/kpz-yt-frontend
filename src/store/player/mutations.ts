@@ -1,6 +1,5 @@
 import { MutationTree } from 'vuex';
 import { PlayerState, RepeatMode } from '.';
-import { Playlist } from '../playlist';
 import Vue from 'vue';
 
 export const mutations: MutationTree<PlayerState> = {
@@ -9,8 +8,9 @@ export const mutations: MutationTree<PlayerState> = {
     state.currentIndex = index;
   },
 
-  setPlaylist(state, playlist: Playlist) {
-    state.playlist = playlist;
+  setName(state, { name, index }) {
+    const item = state.items[index];
+    if (item) item.name = name;
   },
 
   setVolume(state, v: number) {

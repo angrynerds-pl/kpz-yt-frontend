@@ -36,10 +36,11 @@
               </v-icon>
             </v-sheet>
             {{ item ? item.name : 'Pick a song' }}
-             <v-icon
-             large
+            <v-icon
+              large
               @click="redirect"
-              class="ml-4">
+              class="ml-4"
+            >
               mdi-play-box
             </v-icon>
           </v-col>
@@ -181,13 +182,14 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component, Watch } from 'vue-property-decorator';
-import { Getter, Mutation, State } from 'vuex-class';
+import { Getter, Mutation } from 'vuex-class';
 import YouTubePlayerC from 'youtube-player';
 import { YouTubePlayer } from 'youtube-player/dist/types';
 import { PlaylistItem } from '../../store/playlist';
 import moment from 'moment';
 import { RepeatMode } from '../../store/player';
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
+import Axios from 'axios';
 @Component({
   filters: {
     durationFilter: (v: number) => {
@@ -205,6 +207,7 @@ import PlayerStates from 'youtube-player/dist/constants/PlayerStates';
 })
 export default class Player extends Vue {
   RepeatMode = RepeatMode;
+  @Getter('user/authHeader') authHeader!: string;
   @Getter('player/isShuffle') isShuffle!: boolean;
   @Getter('player/repeatMode') repeatMode!: boolean;
   @Getter('player/isItemSet') isItemSet!: boolean;
@@ -257,7 +260,7 @@ export default class Player extends Vue {
     );
     this.player.setSize(this.playerWidth, this.playerHeight);
     this.onVolumeChange(this.volume);
-    this.onMuteChange(this.isMuted);
+    this.onMuteChange();
     this.player.on('stateChange', v => {
       this.playing = v.data == PlayerStates.PLAYING;
       if (v.data == PlayerStates.ENDED) {
@@ -279,7 +282,13 @@ export default class Player extends Vue {
   async redirect() {
     if (this.player && this.item) {
       this.pause();
-      window.open('https://youtu.be/' + this.item.ytID + '?t=' + Math.floor(this.currentDuration), '_blank');
+      window.open(
+        'https://youtu.be/' +
+          this.item.ytID +
+          '?t=' +
+          Math.floor(this.currentDuration),
+        '_blank'
+      );
     }
   }
 
@@ -325,7 +334,7 @@ export default class Player extends Vue {
   }
 
   @Watch('isMuted')
-  onMuteChange(v: boolean) {
+  onMuteChange() {
     if (this.player)
       if (this.isMuted) this.player.mute();
       else this.player.unMute();
@@ -346,6 +355,27 @@ export default class Player extends Vue {
           }
         }
       }, 100);
+      if (v.id) await this.sendPlayInfo(v.id);
+    }
+  }
+
+  async sendPlayInfo(id: number) {
+    try {
+      const res = await Axios.get(`playlist-items/${id}`, {
+        headers: { Authorization: this.authHeader }
+      });
+      const item = res.data.data;
+      await Axios.put(
+        `playlist-items/${id}`,
+        {
+          playbackCount: item.playbackCount + 1
+        },
+        {
+          headers: { Authorization: this.authHeader }
+        }
+      );
+    } catch (e) {
+      console.log(e);
     }
   }
 }

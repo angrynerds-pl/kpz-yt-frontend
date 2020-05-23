@@ -1,7 +1,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mixins, HorizontalBar } from 'vue-chartjs';
-import { Component, Prop, Watch } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import { ChartData, ChartOptions } from 'chart.js';
 
 @Component({
@@ -12,14 +12,14 @@ import { ChartData, ChartOptions } from 'chart.js';
 export default class BarChart extends Vue {
   chartData!: ChartData;
   options!: ChartOptions;
-  renderChart!: any;
+  renderChart!: (data: ChartData, options: ChartOptions) => void;
 
   mounted() {
     this.renderChart(this.chartData, this.options);
   }
 
   @Watch('options', { deep: true })
-  onOptionsChange(n: ChartOptions) {
+  onOptionsChange() {
     this.renderChart(this.chartData, this.options);
   }
 }

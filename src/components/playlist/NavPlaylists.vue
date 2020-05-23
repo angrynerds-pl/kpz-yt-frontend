@@ -4,7 +4,12 @@
       link
       v-for="playlist in playlists"
       :key="playlist.id"
-      @click="$router.push(`/app/playlists/${playlist.id}`)"
+      @click="playlistSelected(`${playlist.id}`)"
+      :class="
+        `/app/playlists/${playlist.id}` === $route.path
+          ? 'v-item--active v-list-item--active'
+          : ''
+      "
     >
       <v-list-item-avatar
         color="grey lighten-5"
@@ -17,11 +22,10 @@
         <v-list-item-title>{{ playlist.name }}</v-list-item-title>
       </v-list-item-content>
       <v-list-item-action>
-        <!-- TODO: click -->
         <v-btn
           icon
           small
-          @click.stop
+          @click.stop="playlistPlayClicked(`${playlist.id}`)"
         >
           <v-icon color="grey lighten-1">mdi-play</v-icon>
         </v-btn>
@@ -39,7 +43,7 @@
       link
       dense
       @click="$router.push('/app/playlists')"
-      style="position:fixed;bottom:0;width:88%;background:#fff;"
+      style="position:fixed;bottom:0;width: calc(100% - 16px); background:#fff;"
     >
       <v-list-item-avatar>
         <v-icon>mdi-plus</v-icon>
@@ -54,27 +58,46 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { Component } from 'vue-property-decorator';
-import { Getter } from 'vuex-class';
-import { Playlist } from '@/store/playlist';
+import { Component, Prop } from 'vue-property-decorator';
+import { Getter, Action } from 'vuex-class';
+import { Playlist, PlaylistItem } from '@/store/playlist';
 import { User } from '@/store/user';
 
 import axios from 'axios';
 @Component({})
 export default class NavPlaylists extends Vue {
+  @Prop({ default: [] }) playlists!: Playlist[];
+
   @Getter('user/authHeader') authHeader!: string;
   @Getter('user/user') user!: User;
+  @Action('player/setPlayDataFetch') setPlayData!: (payload: {
+    playlistItems: PlaylistItem[];
+    index: number | null;
+  }) => void;
 
-  playlists: Playlist[] = [];
-
-  beforeMount() {
+  playlistPlayClicked(playlistId: number) {
+    const payload = {
+      playlistItems: [],
+      index: 0
+    };
     axios
-      .get(`users/${this.user.id}/playlists`, {
+      .get(`playlists/${playlistId}/playlist-items`, {
         headers: { Authorization: this.authHeader }
       })
       .then(res => {
-        this.playlists = res.data.data;
+        if (res.data.data !== undefined) {
+          payload.playlistItems = res.data.data;
+        }
+        this.setPlayData(payload);
+      })
+      .catch(error => {
+        this.$emit('showSnackBar', 'Server error');
+        console.log(error);
       });
+  }
+
+  playlistSelected(playlistId: number) {
+    this.$router.push(`/app/playlists/${playlistId}`);
   }
 }
 </script>

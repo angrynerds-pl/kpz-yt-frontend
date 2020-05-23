@@ -14,9 +14,9 @@ export const mutations: MutationTree<UserState> = {
     }
   },
 
-  setUser(state, user:User){
-    state.user = user
-  }, 
+  setUser(state, user: User) {
+    state.user = user;
+  },
 
   logout(state) {
     state.user = undefined;

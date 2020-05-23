@@ -113,7 +113,7 @@
       <v-btn
         dark
         text
-        @click="snackbarInfo = false"
+        @click="snackbarVisible = false"
         color="error"
       >
         Close
