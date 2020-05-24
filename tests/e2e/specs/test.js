@@ -4,8 +4,8 @@ describe('', () => {
   const username = 'cypressuser';
   const password = 'topsecret';
 
-  afterEach(() => {
-    // cy.pause();
+  after(() => {
+    // Delete created user using requests to API
   });
 
   it('Performs sign up', () => {
@@ -135,14 +135,15 @@ describe('', () => {
       url: '/playlists'
     }).as('playlists-post');
 
-    cy.pause();
+    // Open nav if it's closed
 
-    // cy.visit('localhost:8080');
     cy.contains('div', 'New playlist')
       .last()
       .click();
 
-    cy.pause();
+    // Fill in playlists form
+    // Submit form
+    // Check that playlist exists in navbar drawer
   });
 
   it('Creates playlist item', () => {});
