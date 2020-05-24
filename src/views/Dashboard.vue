@@ -120,7 +120,7 @@ export default class Dashboard extends Vue {
       maintainAspectRatio: false,
       scales: {
         yAxes: [{ ticks: { reverse: true } }],
-        xAxes: [{ ticks: {  beginAtZero: true, stepSize: 1 }}]
+        xAxes: [{ ticks: {  beginAtZero: true, precision : 0 }}]
       },
       responsiveAnimationDuration: 500
     };
