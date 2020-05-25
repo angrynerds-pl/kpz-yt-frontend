@@ -4,7 +4,7 @@ import Home from '../views/Home.vue';
 import Dashboard from '../views/Dashboard.vue';
 import PlaylistCreate from '../views/Playlist/PlaylistCreate.vue';
 import Playlist from '../views/Playlist/Playlist.vue';
-import User from '../views/User.vue';
+import UserForm from '../views/UserForm.vue';
 import App from '../views/App.vue';
 import SignInForm from '../components/user/SignInForm.vue';
 import SignUpForm from '../components/user/SignUpForm.vue';
@@ -48,7 +48,7 @@ const routes: RouteConfig[] = [
       {
         path: 'user',
         name: 'User',
-        component: User
+        component: UserForm
       },
       {
         path: 'playlists',

@@ -12,6 +12,11 @@
           two-line
           @click="$router.push('/app/user')"
           title="Go to profile"
+          :class="
+            '/app/user' === $route.path
+              ? 'v-item--active v-list-item--active'
+              : ''
+          "
         >
           <v-list-item-avatar tile>
             <img
@@ -39,6 +44,9 @@
         <v-list-item
           link
           @click="$router.push(`/app`)"
+          :class="
+            '/app' === $route.path ? 'v-item--active v-list-item--active' : ''
+          "
         >
           <v-list-item-avatar
             color="grey lighten-5"
@@ -52,69 +60,91 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-        <nav-playlists />
+        <nav-playlists v-bind:playlists="playlists" />
       </v-list>
     </v-navigation-drawer>
 
-    <router-view @toggle-nav="nav = !nav"></router-view>
+    <router-view
+      @toggle-nav="nav = !nav"
+      @showSnackbar="showSnackbar"
+      @updatePlaylists="updatePlaylists"
+    >
+    </router-view>
 
     <player />
+
+    <v-snackbar
+      v-model="snackbarVisible"
+      top
+    >
+      {{ snackbarInfo }}
+      <v-btn
+        dark
+        text
+        @click="snackbarVisible = false"
+        color="error"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import axios from 'axios';
 import { Component } from 'vue-property-decorator';
 import { Getter, Mutation } from 'vuex-class';
 import NavPlaylists from '@/components/playlist/NavPlaylists.vue';
 import Player from '@/components/player/Player.vue';
-import { PlaylistItem } from '../store/playlist';
-import User from './User.vue';
+import { PlaylistItem, Playlist } from '../store/playlist';
+import { User } from '../store/user';
 
 @Component({
   components: { NavPlaylists, Player }
 })
 export default class App extends Vue {
   @Getter('user/user') user!: User;
-  @Mutation('user/setUser') setUser!: () => void;
+  @Mutation('user/setUserFromToken') setUserFromToken!: () => void;
   @Mutation('user/logout') logoutMutation!: () => void;
+  @Getter('user/authHeader') authHeader!: string;
   nav = this.$vuetify.breakpoint.lgAndUp;
 
-  /* TEST */
+  playlists: Playlist[] = [];
+
   @Mutation('player/setPlayData') setPlayData!: (payload: {
     playlistItems: PlaylistItem[];
     index: number | null;
   }) => void;
   mounted() {
-    setTimeout(() => {
-      this.setPlayData({
-        playlistItems: [
-          {
-            name: 'Rick Astley - Never Gonna Give You Up (Video)',
-            ytID: 'dQw4w9WgXcQ'
-          },
-          {
-            name: 'Lacheque - DRAGONFRUIT SALAD',
-            ytID: 'hWCs7fsl3QA'
-          },
-          {
-            name: 'Yutaka - Dragonfly',
-            ytID: '2Il1OtvmVSg'
-          }
-        ],
-        index: 1
-      });
-    }, 500);
+    this.updatePlaylists();
   }
-  /* TEST */
 
   beforeMount() {
-    this.setUser();
+    this.setUserFromToken();
   }
 
   logout() {
     this.logoutMutation();
     this.$router.push('/');
+  }
+
+  snackbarInfo = '';
+  snackbarVisible = false;
+
+  showSnackbar(info: string) {
+    this.snackbarInfo = info;
+    this.snackbarVisible = true;
+  }
+
+  updatePlaylists() {
+    axios
+      .get(`users/${this.user.id}/playlists`, {
+        headers: { Authorization: this.authHeader }
+      })
+      .then(res => {
+        this.playlists = res.data.data;
+      });
   }
 }
 </script>

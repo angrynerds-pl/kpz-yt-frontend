@@ -49,6 +49,7 @@
           type="password"
           v-model="passwordRepeat"
           :error-messages="this.getErrors($v.passwordRepeat)"
+          @keydown.enter="submit"
         />
       </v-form>
     </v-card-text>
@@ -56,9 +57,11 @@
       <v-btn
         @click="$router.back()"
         :loading="loading"
+        small
         text
+        tabindex="-1"
       >
-        Sign up
+        Sign in
       </v-btn>
       <v-spacer />
       <v-btn
