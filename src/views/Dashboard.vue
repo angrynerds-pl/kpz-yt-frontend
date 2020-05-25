@@ -79,7 +79,7 @@ import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import BarChart from '@/components/charts/BarChart.vue';
 import Axios from 'axios';
-import { ChartData, ChartOptions } from 'chart.js';
+import { ChartData, ChartOptions, TickOptions } from 'chart.js';
 import { Getter } from 'vuex-class';
 import { User } from '../store/user/index';
 
@@ -120,7 +120,7 @@ export default class Dashboard extends Vue {
       maintainAspectRatio: false,
       scales: {
         yAxes: [{ ticks: { reverse: true } }],
-        xAxes: [{ ticks: {  beginAtZero: true, precision : 0 }}]
+        xAxes: [{ ticks: { beginAtZero: true, precision: 0 } as TickOptions }]
       },
       responsiveAnimationDuration: 500
     };
@@ -134,7 +134,7 @@ export default class Dashboard extends Vue {
           label: 'Playback count',
           backgroundColor: '#f87979',
           data: this.topTitlesData,
-          barThickness: this.barThickness,
+          barThickness: this.barThickness
         }
       ]
     };
@@ -142,7 +142,8 @@ export default class Dashboard extends Vue {
 
   get topTitlesStyle() {
     // 40px in height for each label
-    const newTitlesHeightPx = 40 + (this.barThickness+10) * this.topTitlesLabels.length;
+    const newTitlesHeightPx =
+      40 + (this.barThickness + 10) * this.topTitlesLabels.length;
     return {
       position: 'relative',
       height: `${newTitlesHeightPx}px`
@@ -157,7 +158,7 @@ export default class Dashboard extends Vue {
           label: 'Playback count',
           backgroundColor: '#f87979',
           data: this.topPlaylistsData,
-          barThickness: this.barThickness,
+          barThickness: this.barThickness
         }
       ]
     };
@@ -165,7 +166,8 @@ export default class Dashboard extends Vue {
 
   get topPlaylistsStyle() {
     // 40px in height for each label
-    const newPlaylistsHeightPx = 40 + (this.barThickness+10) * this.topPlaylistsLabels.length;
+    const newPlaylistsHeightPx =
+      40 + (this.barThickness + 10) * this.topPlaylistsLabels.length;
     return {
       position: 'relative',
       height: `${newPlaylistsHeightPx}px`

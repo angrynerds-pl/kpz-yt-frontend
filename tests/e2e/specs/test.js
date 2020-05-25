@@ -1,9 +1,9 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-describe('', () => {
+describe('Test', () => {
   let username;
   const password = 'topsecret';
-  let playlistName = 'Favorites';
+  const playlistName = 'Favorites';
   before(() => {
     const now = new Date();
     const millisSinceEpoch = now.getTime();
