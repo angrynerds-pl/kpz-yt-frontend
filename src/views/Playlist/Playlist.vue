@@ -57,6 +57,7 @@
               label="New name"
               prepend-icon="mdi-pencil"
               v-model="playlistName"
+              @keydown.prevent.enter="changeName(`${$route.params.id}`)"
               :error-messages="this.getErrors($v.playlistName)"
             />
           </v-form>
